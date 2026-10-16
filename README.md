@@ -24,8 +24,8 @@
 ├── Prompt.md
 ├── 分析内容概述.md
 ├── 空调ASP与大宗商品成本传导.md
-├── 财务比较/                     # 4 个工作表对应的 CSV
-├── 空调ASP与大宗商品数据/         # 11 个工作表对应的 CSV
+├── 财务比较/                     # 每张工作表一个 CSV
+├── 空调ASP与大宗商品数据/         # 每张工作表一个 CSV
 ├── scripts/
 │   ├── convert_to_text.py         # 原始材料转换
 │   └── verify_conversion.py       # 转换内容校验
@@ -43,29 +43,31 @@
 
 ## 转换与校验
 
-在仓库根目录运行，需已安装 Python 和 `uv`。依赖通过 `uv` 临时环境提供。
+在仓库根目录运行，需已安装 Python、`uv` 和 Poppler（提供 `pdftotext`）。Python 依赖通过 `uv` 临时环境提供。
 
-仅检查已有转换文件：
-
-```sh
-uv run --with pdfplumber --with python-docx --with openpyxl python3 scripts/verify_conversion.py
-```
-
-从 `origin/` 重新生成转换文件：
+先输出到独立目录试转，不覆盖仓库现有文件：
 
 ```sh
-uv run --with pdfplumber --with python-docx --with openpyxl python3 scripts/convert_to_text.py
+uv run --with python-docx --with openpyxl python3 scripts/convert_to_text.py --output-dir /path/to/conversion-preview
+uv run --with python-docx --with openpyxl python3 scripts/verify_conversion.py --output-dir /path/to/conversion-preview
 ```
 
-**重新转换会覆盖现有 Markdown 和 CSV，运行前应保存人工修改。** 当前转换脚本还会生成 `CONVERSION_LOG.md`；该文件此前已从仓库移除，但脚本仍保留生成逻辑。如果该日志已存在，脚本会拒绝运行。
+检查试转结果后，才覆盖根目录中的转换件：
+
+```sh
+uv run --with python-docx --with openpyxl python3 scripts/convert_to_text.py --overwrite
+uv run --with python-docx --with openpyxl python3 scripts/verify_conversion.py
+```
+
+转换脚本默认拒绝覆盖已有文件；只有明确传入 `--overwrite` 才会替换。若转换件有人工修订，先备份或单独保存。支持 `--only pdf|docx|xlsx` 对单类文件试转。
 
 转换与校验的范围：
 
-- **PDF**：提取文字层，保留分页标记；校验页码序列及各页提取文本是否存在于 Markdown。图片、图表和复杂表格布局仍需查看原件。
-- **DOCX**：转换正文段落和表格文字；当前脚本将表格集中追加在正文后。校验检查文字是否存在，不保证原始段落与表格的交错顺序、样式或图片保留。
-- **XLSX**：导出单元格的缓存值；校验按行列比较这些值，比较时归一化空白。公式、格式和图表不写入 CSV，公式也不会重新计算；缓存缺失的单元格会导出为空。
+- **PDF**：使用 `pdftotext -layout` 保留接近原页面的列间距，并用等宽文本块和 PDF 实际页序标记；报告印刷页码可能不同。校验页数和提取文本。复杂表格没有强行重建成 Markdown 表格，关键数字仍须对照原 PDF 页面。
+- **DOCX**：按原文顺序输出段落与表格，保留标题样式和列表标记；校验逐项检查正文/表格文字及其顺序。图片、字体、颜色和精确分页不转换。
+- **XLSX**：每个工作表输出一个 CSV；公式原文不会丢失，缓存结果会注明，缺失缓存明确标出。校验逐单元格检查值与公式；不重算公式。CSV 不保留单元格格式、合并区域或图表，口径/单位须对照原工作簿及表头核实。
 
-校验通过表示通过上述内容检查，不能据此认定转换件与原件完全等价，也不能证明原始数字或研究结论已经核实。
+校验通过表示内容和来源顺序符合上述检查，不代表版面完全等价，也不验证原始数字或研究结论。任何分析引用仍以 `origin/` 原件为准。
 
 ## 协作
 

@@ -1,10 +1,10 @@
 ﻿公司/主品牌,假设平均匹数,ASP元/台,标准化元/匹,说明
-格力,1.5,3528,,主品牌线上ASP÷假设加权平均匹数；非实际1匹SKU成交价
-格力,1.6,3528,,主品牌线上ASP÷假设加权平均匹数；非实际1匹SKU成交价
-格力,1.7,3528,,主品牌线上ASP÷假设加权平均匹数；非实际1匹SKU成交价
-美的,1.5,2967,,主品牌线上ASP÷假设加权平均匹数；非实际1匹SKU成交价
-美的,1.6,2967,,主品牌线上ASP÷假设加权平均匹数；非实际1匹SKU成交价
-美的,1.7,2967,,主品牌线上ASP÷假设加权平均匹数；非实际1匹SKU成交价
-海尔,1.5,2820,,主品牌线上ASP÷假设加权平均匹数；非实际1匹SKU成交价
-海尔,1.6,2820,,主品牌线上ASP÷假设加权平均匹数；非实际1匹SKU成交价
-海尔,1.7,2820,,主品牌线上ASP÷假设加权平均匹数；非实际1匹SKU成交价
+格力,1.5,3528,FORMULA (cached result unavailable): =C2/B2,主品牌线上ASP÷假设加权平均匹数；非实际1匹SKU成交价
+格力,1.6,3528,FORMULA (cached result unavailable): =C3/B3,主品牌线上ASP÷假设加权平均匹数；非实际1匹SKU成交价
+格力,1.7,3528,FORMULA (cached result unavailable): =C4/B4,主品牌线上ASP÷假设加权平均匹数；非实际1匹SKU成交价
+美的,1.5,2967,FORMULA (cached result unavailable): =C5/B5,主品牌线上ASP÷假设加权平均匹数；非实际1匹SKU成交价
+美的,1.6,2967,FORMULA (cached result unavailable): =C6/B6,主品牌线上ASP÷假设加权平均匹数；非实际1匹SKU成交价
+美的,1.7,2967,FORMULA (cached result unavailable): =C7/B7,主品牌线上ASP÷假设加权平均匹数；非实际1匹SKU成交价
+海尔,1.5,2820,FORMULA (cached result unavailable): =C8/B8,主品牌线上ASP÷假设加权平均匹数；非实际1匹SKU成交价
+海尔,1.6,2820,FORMULA (cached result unavailable): =C9/B9,主品牌线上ASP÷假设加权平均匹数；非实际1匹SKU成交价
+海尔,1.7,2820,FORMULA (cached result unavailable): =C10/B10,主品牌线上ASP÷假设加权平均匹数；非实际1匹SKU成交价
