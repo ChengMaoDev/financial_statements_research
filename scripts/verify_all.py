@@ -43,6 +43,7 @@ from __future__ import annotations
 
 import csv
 import itertools
+import re
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -1299,7 +1300,7 @@ def check_brand_normalization() -> tuple[int, int]:
     if not sku:
         return 0, 0
 
-    print("【45】品牌归一：短别名不跨品牌误命中，食品品牌不进家电面板")
+    print("【46】品牌归一：短别名不跨品牌误命中，食品品牌不进家电面板")
     passed = failed = 0
 
     # 1. 已知的误判组合，必须不再发生
@@ -2175,6 +2176,117 @@ def check_provisions() -> tuple[int, int]:
     return passed, failed
 
 
+def check_audit_independence() -> tuple[int, int]:
+    """审计端独立性：签字人恒 2 名、连续签字不超 5 年、审计年限逐年 +1、
+    意见类型与 治理与经营披露.csv 一致。"""
+    rows = load(FIN / "审计与签字会计师.csv")
+    gov = load(FIN / "治理与经营披露.csv")
+    if not rows:
+        return 0, 0
+
+    print("【45】审计独立性：签字人数恒定、连续签字 ≤5 年、审计年限逐年 +1、意见类型对平")
+    passed = failed = 0
+
+    def check(label: str, ok: bool) -> None:
+        nonlocal passed, failed
+        passed += ok
+        failed += not ok
+        print(f"    {label}  {'OK' if ok else '差异'}")
+
+    signers = [r for r in rows if r["类别"] == "签字注册会计师"]
+
+    # 1) 境内签字人应恒为 2 名、境外恒为 1 名（A 股两名签字 vs 境外单名的模式）
+    dom = [r for r in signers if "境内" in r["项目"]]
+    ovs = [r for r in signers if "境外" in r["项目"]]
+    check(f"境内签字人 {len(dom)} 行全为 2 名", dom and all(r["签字人数"] == "2" for r in dom))
+    check(f"境外签字人 {len(ovs)} 行全为 1 名", ovs and all(r["签字人数"] == "1" for r in ovs))
+
+    # 2) 每人每年只出现一次（同一年同一归属不得有多条不同取值）
+    seen: set[tuple[str, str, str]] = set()
+    dup: list[str] = []
+    for r in signers:
+        key = (r["公司"], r["年度"], r["项目"])
+        if key in seen:
+            dup.append(f"{key}")
+        seen.add(key)
+    check(f"公司×年度×归属 无重复取值{('：' + ';'.join(dup)) if dup else ''}", not dup)
+
+    # 3) 连续签字不超过 5 年（监管：签字注会连续服务满 5 年须轮换）
+    def years_of(company: str, name: str) -> list[int]:
+        out = []
+        for r in signers:
+            if r["公司"] != company or "境内" not in r["项目"]:
+                continue
+            if name in [x for x in re.split(r"[、，,]", r["值"])]:
+                out.append(int(r["年度"]))
+        return sorted(out)
+
+    over: list[str] = []
+    streaks: list[tuple[str, str, int]] = []
+    for company in ("美的集团", "海尔智家", "格力电器"):
+        names = {
+            n
+            for r in signers
+            if r["公司"] == company and "境内" in r["项目"]
+            for n in re.split(r"[、，,]", r["值"])
+        }
+        for name in sorted(names):
+            ys = years_of(company, name)
+            run = cur = 1
+            for a, b in itertools.pairwise(ys):
+                cur = cur + 1 if b == a + 1 else 1
+                run = max(run, cur)
+            streaks.append((company, name, run))
+            if run > 5:
+                over.append(f"{company} {name} 连续 {run} 年")
+    check(
+        f"最长连续签字 ≤5 年（{len(streaks)} 人，最长 "
+        f"{max(r for _, _, r in streaks)} 年）{('：' + ';'.join(over)) if over else ''}",
+        not over,
+    )
+
+    # 4) 自述审计年限逐年 +1
+    tenure: dict[tuple[str, str], dict[int, int]] = {}
+    for r in rows:
+        if r["类别"] != "审计连续性":
+            continue
+        side = "境内" if "境内" in r["项目"] else "境外"
+        tenure.setdefault((r["公司"], side), {})[int(r["年度"])] = int(r["值"])
+    broken = 0
+    rings = 0
+    for (_company, _side), series in tenure.items():
+        for a, b in itertools.pairwise(sorted(series)):
+            if b != a + 1:
+                continue
+            rings += 1
+            if series[b] - series[a] != 1:
+                broken += 1
+    check(f"审计年限链条 {rings} 环逐年 +1（断开 {broken} 环）", broken == 0 and rings > 0)
+
+    # 5) 意见类型与 治理与经营披露.csv 一致
+    known = {(r["公司"], r["报告期"].replace(" 年度", "")): r["审计意见"] for r in gov}
+    compared = 0
+    mismatch = 0
+    for r in rows:
+        if r["类别"] != "审计意见":
+            continue
+        theirs = known.get((r["公司"], r["年度"]))
+        if not theirs:
+            continue
+        compared += 1
+        ours = re.sub(r"\s+", "", r["值"])
+        base = re.sub(r"\s+", "", theirs)
+        if not (base in ours or ours in base):
+            mismatch += 1
+    check(
+        f"意见类型与治理与经营披露对平（{compared} 组，不一致 {mismatch}）",
+        compared > 0 and mismatch == 0,
+    )
+
+    print(f"    通过 {passed}，差异 {failed}\n")
+    return passed, failed
+
+
 def check_primary_key_unique() -> tuple[int, int]:
     """主键唯一性：长表不得出现重复的复合主键。
 
@@ -2193,7 +2305,7 @@ def check_primary_key_unique() -> tuple[int, int]:
         ("存货明细.csv", "年度", ("存货类别",)),
         ("其他综合收益.csv", "期间", ("项目",)),
     ]
-    print("【46】主键唯一性：长表不得有重复的复合主键")
+    print("【47】主键唯一性：长表不得有重复的复合主键")
     passed = failed = 0
     for name, period_col, dims in tables:
         rows = load(FIN / name)
@@ -2227,7 +2339,7 @@ def check_segment_closure() -> tuple[int, int]:
     if not rows:
         return 0, 0
 
-    print("【47】分部报告闭合：各分部相加 = 合计")
+    print("【48】分部报告闭合：各分部相加 = 合计")
     passed = failed = 0
     grouped: dict[tuple[str, str, str], list[dict[str, str]]] = defaultdict(list)
     for row in rows:
@@ -2274,7 +2386,7 @@ def check_cost_funnel() -> tuple[int, int]:
     if not rows:
         return 0, 0
 
-    print("【48】费用漏斗闭合：收入 × (1 − 各成本率之和) ≈ 营业利润")
+    print("【49】费用漏斗闭合：收入 × (1 − 各成本率之和) ≈ 营业利润")
     passed = failed = 0
     for row in rows:
         try:
@@ -2329,7 +2441,7 @@ def check_non_recurring() -> tuple[int, int]:
     if not quality:
         return 0, 0
 
-    print("【49】非经常性损益：归母净利润 − 扣非净利润，占比可复算")
+    print("【50】非经常性损益：归母净利润 − 扣非净利润，占比可复算")
     passed = failed = 0
     for row in quality:
         try:
@@ -2361,7 +2473,7 @@ def check_toolchain() -> tuple[int, int]:
     """
     import shutil
 
-    print("【50】外部工具链：pdftotext（poppler）可用性")
+    print("【51】外部工具链：pdftotext（poppler）可用性")
     path = shutil.which("pdftotext")
     if path:
         print(f"    pdftotext 已安装：{path}")
@@ -2379,7 +2491,7 @@ def check_panel_columns() -> tuple[int, int]:
     而 akshare 返回的 df 第一列本身就叫「日期」，导致表头 7 列、数据 6 列，
     整张表列错位（「日期」列装的是汇买价）。
     """
-    print("【51】结构完整性：CSV 表头列数 = 数据列数")
+    print("【52】结构完整性：CSV 表头列数 = 数据列数")
     # 只放「纯数值表」：按逗号切分即可判断列数。含中文引号字段（如「元；元」）的表
     # 会被简单切分误判，不进这个列表。
     targets = [
@@ -2408,6 +2520,7 @@ def check_panel_columns() -> tuple[int, int]:
         FIN / "外币敞口与汇率敏感性.csv",
         FIN / "或有事项与期后承诺.csv",
         FIN / "预计负债与售后义务.csv",
+        FIN / "审计与签字会计师.csv",
     ]
     passed = failed = 0
     for path in targets:
@@ -2451,7 +2564,7 @@ def check_jdunion_sort() -> tuple[int, int]:
     if not files:
         return 0, 0
 
-    print("【52】京东联盟排序有效性：原始导出 o30 是否降序")
+    print("【53】京东联盟排序有效性：原始导出 o30 是否降序")
     failed_files: list[tuple[str, float]] = []
     for path in files:
         with path.open(encoding="utf-8-sig") as stream:
@@ -2498,7 +2611,7 @@ def check_hedging() -> tuple[int, int]:
     if not rows:
         return 0, 0
 
-    print("【53】套期保值：三家均提取到数据，期末金额与净资产占比同向")
+    print("【54】套期保值：三家均提取到数据，期末金额与净资产占比同向")
     passed = failed = 0
     grouped: dict[tuple[str, str, str], dict[str, float]] = defaultdict(dict)
     for row in rows:
@@ -2545,7 +2658,7 @@ def check_real_estate() -> tuple[int, int]:
     if not rows:
         return 0, 0
 
-    print("【54】房地产景气指数：月份连续、取值合理")
+    print("【55】房地产景气指数：月份连续、取值合理")
     values: list[tuple[str, float]] = []
     for row in rows:
         try:
@@ -2590,7 +2703,7 @@ def check_data_nature() -> tuple[int, int]:
     if not source:
         return 0, 0
 
-    print("【55】数据性质一致性：CSV 的 actual/forecast 与来源登记不矛盾")
+    print("【56】数据性质一致性：CSV 的 actual/forecast 与来源登记不矛盾")
     nature_of = {r["编号"]: r["数据性质"] for r in source}
     targets = [
         "国庆档期数据.csv",
@@ -2640,7 +2753,7 @@ def check_cross_keyword_dedup() -> tuple[int, int]:
     if not sku:
         return 0, 0
 
-    print("【56】跨检索词去重：同一 SKU 跨关键词重复入库的规模")
+    print("【57】跨检索词去重：同一 SKU 跨关键词重复入库的规模")
     by_sku: dict[str, set[str]] = defaultdict(set)
     for row in sku:
         by_sku[row["SKU"]].add(row["关键词"])
@@ -2805,6 +2918,7 @@ def main() -> int:
         check_fx_exposure,
         check_contingencies,
         check_provisions,
+        check_audit_independence,
         check_brand_normalization,
         check_primary_key_unique,
         check_segment_closure,
