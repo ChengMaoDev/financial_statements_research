@@ -1299,7 +1299,7 @@ def check_brand_normalization() -> tuple[int, int]:
     if not sku:
         return 0, 0
 
-    print("【43】品牌归一：短别名不跨品牌误命中，食品品牌不进家电面板")
+    print("【44】品牌归一：短别名不跨品牌误命中，食品品牌不进家电面板")
     passed = failed = 0
 
     # 1. 已知的误判组合，必须不再发生
@@ -2015,6 +2015,91 @@ def check_fx_exposure() -> tuple[int, int]:
     return passed, failed
 
 
+def check_contingencies() -> tuple[int, int]:
+    """或有/期后/承诺表：合计可复算，且与担保、分红两张表交叉一致。"""
+    rows = load(FIN / "或有事项与期后承诺.csv")
+    if not rows:
+        return 0, 0
+
+    values = {(r["公司"], r["年度"], r["项目"]): r["金额(亿元)"] for r in rows if r["金额(亿元)"]}
+    print("【43】或有事项与期后承诺：合计可复算、与担保/分红表交叉一致")
+    passed = failed = 0
+
+    def check(label: str, ok: bool) -> None:
+        nonlocal passed, failed
+        passed += ok
+        failed += not ok
+        print(f"    {label}  {'OK' if ok else '差异'}")
+
+    # 1) 美的或有负债：缺口 = 潜在损失 − 承诺赔付
+    for year, loss, cover in (("2025", 6.99, 1.68), ("2024", 6.61, 1.52)):
+        stated = values.get(("美的集团", year, "赔付承诺未覆盖的风险缺口"))
+        ok = stated is not None and abs(float(stated) - (loss - cover)) <= 0.01
+        check(f"美的 {year} 巴西税务纠纷缺口 {loss}−{cover}", ok)
+
+    # 2) 美的 2025 资本承诺合计 = 分项相加
+    parts = values.get(("美的集团", "2025", "资本性支出—房屋建筑物及机器设备"))
+    invest = values.get(("美的集团", "2025", "投资承诺"))
+    total = values.get(("美的集团", "2025", "资本性支出承诺合计"))
+    if None not in (parts, invest, total):
+        check(
+            "美的 2025 资本承诺 39.13+0.02=39.15",
+            abs(float(parts) + float(invest) - float(total)) <= 0.01,
+        )
+
+    # 3) 格力按揭担保与担保表的 2025 口径不冲突（担保表 43.87 为票据池口径）
+    gree = values.get(("格力电器", "2025", "购房客户按揭贷款阶段性担保（尚未结清）"))
+    ok = gree is not None and 15.0 <= float(gree) <= 17.0
+    check("格力 2025 购房按揭担保 16.05 亿在合理区间", ok)
+
+    # 4) 期后提议每股数 × 分红送配表里「2025年报」年度分红的实际派息比例。
+    #    美的/格力提议即实施（38.0 / 20.0 相等）；海尔不等（8.867 → 8.9151），
+    #    不等只有一种合法解释：年报说的「维持分配总额不变，相应调整每股分配比例」，
+    #    即基数变小、每股变大。所以海尔必须是实施 > 提议，反过来就是数据错了。
+    dividends = load(FIN / "分红送配.csv")
+    implemented = {
+        r["公司"]: float(r["派息比例"])
+        for r in dividends
+        if r["报告时间"] == "2025年报"
+        and r["分红类型"] == "年度分红"
+        and r["派息比例"] not in ("", "nan")
+    }
+    for company, expected in (
+        ("美的集团", 38.0),
+        ("格力电器", 20.0),
+        ("海尔智家", 8.867),
+    ):
+        key = (company, "2025", "董事会提议每 10 股现金股利（元，含税）")
+        proposed = values.get(key)
+        actual = implemented.get(company)
+        if proposed is None or actual is None:
+            continue
+        proposed = float(proposed)
+        if abs(proposed - expected) > 0.01:
+            check(f"{company} 提议每股 {expected} 元/10 股", False)
+            continue
+        if company == "海尔智家":
+            ok = actual > proposed
+            note = f"实施 {actual} > 提议 {proposed}（总额不变、基数缩小）"
+        else:
+            ok = abs(actual - proposed) <= 0.01
+            note = f"提议=实施={proposed}"
+        check(f"{company} 期后提议 vs 分红送配实施：{note}", ok)
+
+    # 5) 海尔：披露合计 ÷ 提议每股 = 隐含基数；÷ 实施每股 = 实施基数
+    haier_total = 8_248_280_749.27
+    implied = haier_total / (8.867 / 10) / 1e8
+    stated = values.get(("海尔智家", "2025", "隐含可参与分配股数（亿股）"))
+    ok = stated is not None and abs(float(stated) - implied) <= 0.01
+    check(f"海尔 隐含基数 = 合计÷每股 = {implied:.2f} 亿股", ok)
+
+    # 6) 每家至少一条「未披露」记录（证明区分了「无」与「没披露」）
+    undisclosed = [r for r in rows if r["数据性质"] == "未披露"]
+    check(f"存在未披露项（{len(undisclosed)} 条，区分「无」与「未披露」）", len(undisclosed) >= 2)
+    print(f"    通过 {passed}，差异 {failed}\n")
+    return passed, failed
+
+
 def check_primary_key_unique() -> tuple[int, int]:
     """主键唯一性：长表不得出现重复的复合主键。
 
@@ -2033,7 +2118,7 @@ def check_primary_key_unique() -> tuple[int, int]:
         ("存货明细.csv", "年度", ("存货类别",)),
         ("其他综合收益.csv", "期间", ("项目",)),
     ]
-    print("【44】主键唯一性：长表不得有重复的复合主键")
+    print("【45】主键唯一性：长表不得有重复的复合主键")
     passed = failed = 0
     for name, period_col, dims in tables:
         rows = load(FIN / name)
@@ -2067,7 +2152,7 @@ def check_segment_closure() -> tuple[int, int]:
     if not rows:
         return 0, 0
 
-    print("【45】分部报告闭合：各分部相加 = 合计")
+    print("【46】分部报告闭合：各分部相加 = 合计")
     passed = failed = 0
     grouped: dict[tuple[str, str, str], list[dict[str, str]]] = defaultdict(list)
     for row in rows:
@@ -2114,7 +2199,7 @@ def check_cost_funnel() -> tuple[int, int]:
     if not rows:
         return 0, 0
 
-    print("【46】费用漏斗闭合：收入 × (1 − 各成本率之和) ≈ 营业利润")
+    print("【47】费用漏斗闭合：收入 × (1 − 各成本率之和) ≈ 营业利润")
     passed = failed = 0
     for row in rows:
         try:
@@ -2169,7 +2254,7 @@ def check_non_recurring() -> tuple[int, int]:
     if not quality:
         return 0, 0
 
-    print("【47】非经常性损益：归母净利润 − 扣非净利润，占比可复算")
+    print("【48】非经常性损益：归母净利润 − 扣非净利润，占比可复算")
     passed = failed = 0
     for row in quality:
         try:
@@ -2201,7 +2286,7 @@ def check_toolchain() -> tuple[int, int]:
     """
     import shutil
 
-    print("【48】外部工具链：pdftotext（poppler）可用性")
+    print("【49】外部工具链：pdftotext（poppler）可用性")
     path = shutil.which("pdftotext")
     if path:
         print(f"    pdftotext 已安装：{path}")
@@ -2219,7 +2304,7 @@ def check_panel_columns() -> tuple[int, int]:
     而 akshare 返回的 df 第一列本身就叫「日期」，导致表头 7 列、数据 6 列，
     整张表列错位（「日期」列装的是汇买价）。
     """
-    print("【49】结构完整性：CSV 表头列数 = 数据列数")
+    print("【50】结构完整性：CSV 表头列数 = 数据列数")
     # 只放「纯数值表」：按逗号切分即可判断列数。含中文引号字段（如「元；元」）的表
     # 会被简单切分误判，不进这个列表。
     targets = [
@@ -2246,6 +2331,7 @@ def check_panel_columns() -> tuple[int, int]:
         FIN / "营运效率与现金流.csv",
         FIN / "单季度经营_2017起.csv",
         FIN / "外币敞口与汇率敏感性.csv",
+        FIN / "或有事项与期后承诺.csv",
     ]
     passed = failed = 0
     for path in targets:
@@ -2289,7 +2375,7 @@ def check_jdunion_sort() -> tuple[int, int]:
     if not files:
         return 0, 0
 
-    print("【50】京东联盟排序有效性：原始导出 o30 是否降序")
+    print("【51】京东联盟排序有效性：原始导出 o30 是否降序")
     failed_files: list[tuple[str, float]] = []
     for path in files:
         with path.open(encoding="utf-8-sig") as stream:
@@ -2336,7 +2422,7 @@ def check_hedging() -> tuple[int, int]:
     if not rows:
         return 0, 0
 
-    print("【51】套期保值：三家均提取到数据，期末金额与净资产占比同向")
+    print("【52】套期保值：三家均提取到数据，期末金额与净资产占比同向")
     passed = failed = 0
     grouped: dict[tuple[str, str, str], dict[str, float]] = defaultdict(dict)
     for row in rows:
@@ -2383,7 +2469,7 @@ def check_real_estate() -> tuple[int, int]:
     if not rows:
         return 0, 0
 
-    print("【52】房地产景气指数：月份连续、取值合理")
+    print("【53】房地产景气指数：月份连续、取值合理")
     values: list[tuple[str, float]] = []
     for row in rows:
         try:
@@ -2428,7 +2514,7 @@ def check_data_nature() -> tuple[int, int]:
     if not source:
         return 0, 0
 
-    print("【53】数据性质一致性：CSV 的 actual/forecast 与来源登记不矛盾")
+    print("【54】数据性质一致性：CSV 的 actual/forecast 与来源登记不矛盾")
     nature_of = {r["编号"]: r["数据性质"] for r in source}
     targets = [
         "国庆档期数据.csv",
@@ -2478,7 +2564,7 @@ def check_cross_keyword_dedup() -> tuple[int, int]:
     if not sku:
         return 0, 0
 
-    print("【54】跨检索词去重：同一 SKU 跨关键词重复入库的规模")
+    print("【55】跨检索词去重：同一 SKU 跨关键词重复入库的规模")
     by_sku: dict[str, set[str]] = defaultdict(set)
     for row in sku:
         by_sku[row["SKU"]].add(row["关键词"])
@@ -2641,6 +2727,7 @@ def main() -> int:
         check_efficiency_coverage,
         check_quarterly_long,
         check_fx_exposure,
+        check_contingencies,
         check_brand_normalization,
         check_primary_key_unique,
         check_segment_closure,
