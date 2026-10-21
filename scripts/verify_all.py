@@ -1866,6 +1866,42 @@ def check_subsidiaries() -> tuple[int, int]:
     return passed, failed
 
 
+def check_efficiency_coverage() -> tuple[int, int]:
+    """营运效率：覆盖 2017—2025，且现金转换周期 = 应收 + 存货 − 应付。"""
+    rows = load(FIN / "营运效率与现金流.csv")
+    if not rows:
+        return 0, 0
+
+    print("【52】营运效率：覆盖 2017—2025，现金转换周期 = 应收 + 存货 − 应付")
+    passed = failed = 0
+    for company in ("美的集团", "海尔智家", "格力电器"):
+        years = sorted(r["年度"] for r in rows if r["公司"] == company)
+        ok_coverage = years == [str(y) for y in range(2017, 2026)]
+        passed += ok_coverage
+        failed += not ok_coverage
+        print(
+            f"    {company:<8}覆盖 {years[0] if years else '-'}–{years[-1] if years else '-'}"
+            f"（{len(years)} 年）  {'OK' if ok_coverage else '差异'}"
+        )
+
+    for row in rows:
+        try:
+            ar = float(row["应收周转天数(平均)"])
+            inv = float(row["存货周转天数(平均)"])
+            ap = float(row["应付周转天数(平均)"])
+            ccc = float(row["现金转换周期(天)"])
+        except (ValueError, KeyError, TypeError):
+            continue
+        gap = (ar + inv - ap) - ccc
+        ok = abs(gap) <= 0.2
+        passed += ok
+        failed += not ok
+        if not ok:
+            print(f"    {row['公司']} {row['年度']} 现金周期差 {gap:+.2f} 天")
+    print(f"    通过 {passed}，差异 {failed}\n")
+    return passed, failed
+
+
 def check_primary_key_unique() -> tuple[int, int]:
     """主键唯一性：长表不得出现重复的复合主键。
 
@@ -2094,6 +2130,7 @@ def check_panel_columns() -> tuple[int, int]:
         FIN / "供应商客户集中度时序.csv",
         FIN / "无形资产明细.csv",
         FIN / "子公司与合并范围.csv",
+        FIN / "营运效率与现金流.csv",
     ]
     passed = failed = 0
     for path in targets:
@@ -2486,6 +2523,7 @@ def main() -> int:
         check_supply_chain,
         check_intangibles,
         check_subsidiaries,
+        check_efficiency_coverage,
         check_brand_normalization,
         check_primary_key_unique,
         check_segment_closure,
