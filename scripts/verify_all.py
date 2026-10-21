@@ -1300,7 +1300,7 @@ def check_brand_normalization() -> tuple[int, int]:
     if not sku:
         return 0, 0
 
-    print("【46】品牌归一：短别名不跨品牌误命中，食品品牌不进家电面板")
+    print("【47】品牌归一：短别名不跨品牌误命中，食品品牌不进家电面板")
     passed = failed = 0
 
     # 1. 已知的误判组合，必须不再发生
@@ -2287,6 +2287,145 @@ def check_audit_independence() -> tuple[int, int]:
     return passed, failed
 
 
+def check_contract_notes() -> tuple[int, int]:
+    """合同资产/负债附注：分项加总=原值、损失率可复算、链条衔接、与报表对平。"""
+    rows = load(FIN / "合同资产与合同负债附注.csv")
+    bs = load(FIN / "资产负债表.csv")
+    if not rows:
+        return 0, 0
+
+    print("【46】合同资产与负债附注：分项加总 = 原值，损失率可复算，与报表对平")
+    passed = failed = 0
+
+    def check(label: str, ok: bool) -> None:
+        nonlocal passed, failed
+        passed += ok
+        failed += not ok
+        print(f"    {label}  {'OK' if ok else '差异'}")
+
+    midea = [r for r in rows if r["公司"] == "美的集团"]
+    years = sorted({r["年度"] for r in midea})
+
+    def end_value(year: str, item: str) -> float | None:
+        hit = [
+            r
+            for r in midea
+            if r["年度"] == year and r["项目"] == item and r["期别"] == "期末" and r["金额或比例"]
+        ]
+        return float(hit[0]["金额或比例"]) if hit else None
+
+    def raw_thousand(year: str, item: str) -> float | None:
+        """取「附注原值(千元)」列：未舍入的源值。"""
+        hit = [
+            r
+            for r in midea
+            if r["年度"] == year
+            and r["项目"] == item
+            and r["期别"] == "期末"
+            and r.get("附注原值(千元)")
+        ]
+        return float(hit[0]["附注原值(千元)"]) if hit else None
+
+    # 1) 原值 − 减值 = 净额
+    for year in years:
+        gross = end_value(year, "合同资产原值")
+        allow = end_value(year, "减：合同资产减值准备")
+        net = end_value(year, "合同资产净额")
+        if None in (gross, net):
+            check(f"{year} 合同资产原值/净额齐备", False)
+            continue
+        if allow is not None:
+            check(f"{year} 原值 − 减值 = 净额", abs(gross - abs(allow) - net) <= 0.02)
+
+    # 2) 合同负债分项相加 = 报表数
+    sheet = {
+        (r["公司"], r["报告期"]): float(r["数值"]) / 1e8
+        for r in bs
+        if r["科目"] == "合同负债" and r["数值"] not in ("", "nan")
+    }
+    for year in years:
+        goods = end_value(year, "预收货款及劳务款")
+        eng = end_value(year, "预收工程款")
+        theirs = sheet.get(("美的集团", f"{year}1231"))
+        if None in (goods, eng) or not theirs:
+            continue
+        check(f"{year} 预收货款+工程款 = 报表 {theirs:.2f} 亿", abs(goods + eng - theirs) <= 0.02)
+
+    # 3) 净额与报表合同资产对平
+    asset = {
+        (r["公司"], r["报告期"]): float(r["数值"]) / 1e8
+        for r in bs
+        if r["科目"] == "合同资产" and r["数值"] not in ("", "nan")
+    }
+    for year in years:
+        net = end_value(year, "合同资产净额")
+        theirs = asset.get(("美的集团", f"{year}1231"))
+        if net is None or not theirs:
+            continue
+        check(f"{year} 附注净额 = 报表合同资产 {theirs:.2f} 亿", abs(net - theirs) <= 0.02)
+
+    # 4) 预期信用损失率可复算（元级：亿元舍入会得到 4.17% vs 4.22% 的假差异）
+    # 用「附注原值(千元)」列复算，不用「金额或比例」——后者保留两位亿元，
+    # 单项计提这类小额（3,056 千元 = 0.00 亿）会直接归零，拿它算比率必然假报差异。
+    ecl: dict[tuple[str, str], dict[str, float | str]] = {}
+    for r in midea:
+        if "业务" not in r["项目"]:
+            continue
+        key = (r["年度"], r["项目"].split("业务")[0])
+        bucket = ecl.setdefault(key, {})
+        raw = r.get("附注原值(千元)")
+        if "账面余额" in r["项目"] and raw:
+            bucket["balance"] = float(raw)
+        elif "减值准备" in r["项目"] and raw:
+            bucket["allowance"] = abs(float(raw))
+        elif "损失率" in r["项目"]:
+            bucket["rate"] = float(r["金额或比例"].rstrip("%"))
+    computed = 0
+    for (year, kind), bucket in sorted(ecl.items()):
+        if not all(k in bucket for k in ("balance", "allowance", "rate")):
+            continue
+        if not bucket["balance"]:
+            continue
+        computed += 1
+        implied = round(bucket["allowance"] / bucket["balance"] * 100, 2)
+        check(
+            f"{year} {kind} 隐含损失率 = 披露 {bucket['rate']}%",
+            abs(implied - float(bucket["rate"])) <= 0.01,
+        )
+    check(f"损失率复算覆盖 {computed} 组", computed >= 10)
+
+    # 5) 结转率单调可解释：2020—2024 为 90%，2025 跳到 95%
+    rates = {r["年度"]: float(r["金额或比例"].rstrip("%")) for r in midea if "结转率" in r["项目"]}
+    check(
+        f"结转率覆盖 {len(rates)} 年且只取 90/95",
+        len(rates) >= 6 and set(rates.values()) <= {90.0, 95.0},
+    )
+    check(
+        "2025 结转率升至 95%（与 2020—2024 的 90% 不同）",
+        rates.get("2025") == 95.0 and rates.get("2024") == 90.0,
+    )
+
+    # 6) 主键唯一 + 「无单项计提」不能与有金额行并存
+    seen: set[tuple[str, str, str]] = set()
+    dup = 0
+    for r in midea:
+        key = (r["年度"], r["期别"], r["项目"])
+        if key in seen:
+            dup += 1
+        seen.add(key)
+    check(f"美的 公司×年度×期别×项目 无重复（{len(seen)} 键）", dup == 0)
+
+    # 7) 海尔/格力记「未披露」而非 0
+    others = [r for r in rows if r["公司"] != "美的集团"]
+    check(
+        f"海尔/格力附注明细记为未披露（{len(others)} 条）",
+        others and all(r["数据性质"] == "未披露" and not r["金额或比例"] for r in others),
+    )
+
+    print(f"    通过 {passed}，差异 {failed}\n")
+    return passed, failed
+
+
 def check_primary_key_unique() -> tuple[int, int]:
     """主键唯一性：长表不得出现重复的复合主键。
 
@@ -2305,7 +2444,7 @@ def check_primary_key_unique() -> tuple[int, int]:
         ("存货明细.csv", "年度", ("存货类别",)),
         ("其他综合收益.csv", "期间", ("项目",)),
     ]
-    print("【47】主键唯一性：长表不得有重复的复合主键")
+    print("【48】主键唯一性：长表不得有重复的复合主键")
     passed = failed = 0
     for name, period_col, dims in tables:
         rows = load(FIN / name)
@@ -2339,7 +2478,7 @@ def check_segment_closure() -> tuple[int, int]:
     if not rows:
         return 0, 0
 
-    print("【48】分部报告闭合：各分部相加 = 合计")
+    print("【49】分部报告闭合：各分部相加 = 合计")
     passed = failed = 0
     grouped: dict[tuple[str, str, str], list[dict[str, str]]] = defaultdict(list)
     for row in rows:
@@ -2386,7 +2525,7 @@ def check_cost_funnel() -> tuple[int, int]:
     if not rows:
         return 0, 0
 
-    print("【49】费用漏斗闭合：收入 × (1 − 各成本率之和) ≈ 营业利润")
+    print("【50】费用漏斗闭合：收入 × (1 − 各成本率之和) ≈ 营业利润")
     passed = failed = 0
     for row in rows:
         try:
@@ -2441,7 +2580,7 @@ def check_non_recurring() -> tuple[int, int]:
     if not quality:
         return 0, 0
 
-    print("【50】非经常性损益：归母净利润 − 扣非净利润，占比可复算")
+    print("【51】非经常性损益：归母净利润 − 扣非净利润，占比可复算")
     passed = failed = 0
     for row in quality:
         try:
@@ -2473,7 +2612,7 @@ def check_toolchain() -> tuple[int, int]:
     """
     import shutil
 
-    print("【51】外部工具链：pdftotext（poppler）可用性")
+    print("【52】外部工具链：pdftotext（poppler）可用性")
     path = shutil.which("pdftotext")
     if path:
         print(f"    pdftotext 已安装：{path}")
@@ -2491,7 +2630,7 @@ def check_panel_columns() -> tuple[int, int]:
     而 akshare 返回的 df 第一列本身就叫「日期」，导致表头 7 列、数据 6 列，
     整张表列错位（「日期」列装的是汇买价）。
     """
-    print("【52】结构完整性：CSV 表头列数 = 数据列数")
+    print("【53】结构完整性：CSV 表头列数 = 数据列数")
     # 只放「纯数值表」：按逗号切分即可判断列数。含中文引号字段（如「元；元」）的表
     # 会被简单切分误判，不进这个列表。
     targets = [
@@ -2521,6 +2660,7 @@ def check_panel_columns() -> tuple[int, int]:
         FIN / "或有事项与期后承诺.csv",
         FIN / "预计负债与售后义务.csv",
         FIN / "审计与签字会计师.csv",
+        FIN / "合同资产与合同负债附注.csv",
     ]
     passed = failed = 0
     for path in targets:
@@ -2564,7 +2704,7 @@ def check_jdunion_sort() -> tuple[int, int]:
     if not files:
         return 0, 0
 
-    print("【53】京东联盟排序有效性：原始导出 o30 是否降序")
+    print("【54】京东联盟排序有效性：原始导出 o30 是否降序")
     failed_files: list[tuple[str, float]] = []
     for path in files:
         with path.open(encoding="utf-8-sig") as stream:
@@ -2611,7 +2751,7 @@ def check_hedging() -> tuple[int, int]:
     if not rows:
         return 0, 0
 
-    print("【54】套期保值：三家均提取到数据，期末金额与净资产占比同向")
+    print("【55】套期保值：三家均提取到数据，期末金额与净资产占比同向")
     passed = failed = 0
     grouped: dict[tuple[str, str, str], dict[str, float]] = defaultdict(dict)
     for row in rows:
@@ -2658,7 +2798,7 @@ def check_real_estate() -> tuple[int, int]:
     if not rows:
         return 0, 0
 
-    print("【55】房地产景气指数：月份连续、取值合理")
+    print("【56】房地产景气指数：月份连续、取值合理")
     values: list[tuple[str, float]] = []
     for row in rows:
         try:
@@ -2703,7 +2843,7 @@ def check_data_nature() -> tuple[int, int]:
     if not source:
         return 0, 0
 
-    print("【56】数据性质一致性：CSV 的 actual/forecast 与来源登记不矛盾")
+    print("【57】数据性质一致性：CSV 的 actual/forecast 与来源登记不矛盾")
     nature_of = {r["编号"]: r["数据性质"] for r in source}
     targets = [
         "国庆档期数据.csv",
@@ -2753,7 +2893,7 @@ def check_cross_keyword_dedup() -> tuple[int, int]:
     if not sku:
         return 0, 0
 
-    print("【57】跨检索词去重：同一 SKU 跨关键词重复入库的规模")
+    print("【58】跨检索词去重：同一 SKU 跨关键词重复入库的规模")
     by_sku: dict[str, set[str]] = defaultdict(set)
     for row in sku:
         by_sku[row["SKU"]].add(row["关键词"])
@@ -2919,6 +3059,7 @@ def main() -> int:
         check_contingencies,
         check_provisions,
         check_audit_independence,
+        check_contract_notes,
         check_brand_normalization,
         check_primary_key_unique,
         check_segment_closure,
