@@ -202,7 +202,6 @@ def main() -> int:
     )
     parser.parse_args()
 
-    stamp = f"{datetime.now():%Y-%m-%d %H:%M:%S}"
     out_rows: list[list[str]] = []
     problems: list[str] = []
 
@@ -211,6 +210,9 @@ def main() -> int:
         if not pdf.exists():
             problems.append(f"缺少 {filename}")
             continue
+        # 用 PDF 的文件时间戳，不用当前时间：同一份 PDF 重跑必须产出逐字节相同的 CSV，
+        # 否则每次重跑都会产生 diff，「可重跑复现」就失去了意义。
+        stamp = datetime.fromtimestamp(pdf.stat().st_mtime).strftime("%Y-%m-%d %H:%M:%S")
         try:
             text = pdf_text(pdf)
         except (RuntimeError, FileNotFoundError) as exc:

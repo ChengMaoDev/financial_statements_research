@@ -398,7 +398,7 @@ def main() -> int:
     args = parser.parse_args()
     if not args.all:
         parser.print_help()
-        return 1
+        return 0
 
     rows: list[list[str]] = []
     checks: list[tuple[str, str, str, float, float]] = []

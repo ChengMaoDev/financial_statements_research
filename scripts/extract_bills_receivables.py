@@ -933,7 +933,7 @@ def main() -> int:
     args = parser.parse_args()
     if not args.all:
         parser.print_help()
-        return 1
+        return 0
 
     revenue = load_revenue()
     balance = load_balance()

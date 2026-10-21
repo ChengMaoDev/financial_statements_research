@@ -489,7 +489,9 @@ def guarantees(text: str, company: str) -> dict[str, tuple[float | None, str]]:
             "披露值",
         )
         if match:
-            out["其中：对外担保（A4，不含对子公司）"] = (0.0, "计算值")
+            # 格力的 A 区（对外担保，不含对子公司）整块空白、无任何数字。
+            # 从「A 区标题下没有明细记录」推断为 0，标计算值而非披露值。
+            out["其中：对外担保（A4，表格整块空白，推断为 0）"] = (0.0, "计算值")
         match = re.search(r"尚未结清的担保金额为 ([\d,.]+) 万元", text)
         out["购房按揭阶段性担保（或有事项，表外）"] = (
             number(match.group(1)) * 1e4 if match else None,
@@ -764,7 +766,7 @@ def main() -> int:
     args = parser.parse_args()
     if not args.all:
         parser.print_help()
-        return 1
+        return 0
 
     sheet = balance_sheet()
     rows: list[list[str]] = []

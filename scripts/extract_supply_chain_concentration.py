@@ -724,7 +724,7 @@ def main() -> int:
     args = parser.parse_args()
     if not args.all:
         parser.print_help()
-        return 1
+        return 0
 
     denom = load_denominators()
     rows = build_rows(denom)
