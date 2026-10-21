@@ -1299,7 +1299,7 @@ def check_brand_normalization() -> tuple[int, int]:
     if not sku:
         return 0, 0
 
-    print("【40】品牌归一：短别名不跨品牌误命中，食品品牌不进家电面板")
+    print("【42】品牌归一：短别名不跨品牌误命中，食品品牌不进家电面板")
     passed = failed = 0
 
     # 1. 已知的误判组合，必须不再发生
@@ -1872,7 +1872,7 @@ def check_efficiency_coverage() -> tuple[int, int]:
     if not rows:
         return 0, 0
 
-    print("【52】营运效率：覆盖 2017—2025，现金转换周期 = 应收 + 存货 − 应付")
+    print("【40】营运效率：覆盖 2017—2025，现金转换周期 = 应收 + 存货 − 应付")
     passed = failed = 0
     for company in ("美的集团", "海尔智家", "格力电器"):
         years = sorted(r["年度"] for r in rows if r["公司"] == company)
@@ -1902,6 +1902,53 @@ def check_efficiency_coverage() -> tuple[int, int]:
     return passed, failed
 
 
+def check_quarterly_long() -> tuple[int, int]:
+    """单季表：有年报分季表的年份用披露值；相减口径只在无披露时使用。"""
+    rows = load(FIN / "单季度经营_2017起.csv")
+    disclosed = load(FIN / "分季度经营.csv")
+    if not rows:
+        return 0, 0
+
+    dis = {
+        (r["公司"], r["年度"], r["季度"]): float(r["数值"]) / 1e8
+        for r in disclosed
+        if r["指标"] == "营业收入"
+    }
+
+    print("【41】单季表：披露优先；有分季表的年份不得出现 0 值")
+    print(f"    {'公司':<8}{'年度':<6}{'单季相加':>10}{'披露相加':>10}{'差':>8}  结果")
+    passed = failed = 0
+    years = sorted({(r["公司"], r["年度"]) for r in rows})
+    for company, year in years:
+        singles = [
+            r for r in rows if r["公司"] == company and r["年度"] == year and r["营业收入(亿元)"]
+        ]
+        if not singles:
+            continue
+        total = sum(float(r["营业收入(亿元)"]) for r in singles)
+        modes = {r["口径"] for r in singles}
+        has_disclosed = any("披露分季表" in m for m in modes)
+        # 有分季表的年份必须 4 季齐全，且用的是披露值
+        ok = (not has_disclosed) or len(singles) == 4
+        if has_disclosed and disclosed:
+            d_total = sum(dis.get((company, year, q), 0.0) for q in ("Q1", "Q2", "Q3", "Q4"))
+            ok = ok and abs(d_total - total) < 0.05
+        passed += ok
+        failed += not ok
+        if not ok:
+            print(
+                f"    {company:<8}{year:<6}{total:>10.2f}{'':>10}{'':>8}  差异（{len(singles)} 季）"
+            )
+    # 2026 年只到 Q2，不应出现 Q3/Q4
+    future = [r for r in rows if r["年度"] == "2026" and r["季度"] in ("Q3", "Q4")]
+    ok = not future
+    passed += ok
+    failed += not ok
+    print(f"    2026 只到 Q2：{'OK' if ok else f'多出 {len(future)} 行'}")
+    print(f"    通过 {passed}，差异 {failed}\n")
+    return passed, failed
+
+
 def check_primary_key_unique() -> tuple[int, int]:
     """主键唯一性：长表不得出现重复的复合主键。
 
@@ -1920,7 +1967,7 @@ def check_primary_key_unique() -> tuple[int, int]:
         ("存货明细.csv", "年度", ("存货类别",)),
         ("其他综合收益.csv", "期间", ("项目",)),
     ]
-    print("【41】主键唯一性：长表不得有重复的复合主键")
+    print("【43】主键唯一性：长表不得有重复的复合主键")
     passed = failed = 0
     for name, period_col, dims in tables:
         rows = load(FIN / name)
@@ -1954,7 +2001,7 @@ def check_segment_closure() -> tuple[int, int]:
     if not rows:
         return 0, 0
 
-    print("【42】分部报告闭合：各分部相加 = 合计")
+    print("【44】分部报告闭合：各分部相加 = 合计")
     passed = failed = 0
     grouped: dict[tuple[str, str, str], list[dict[str, str]]] = defaultdict(list)
     for row in rows:
@@ -2001,7 +2048,7 @@ def check_cost_funnel() -> tuple[int, int]:
     if not rows:
         return 0, 0
 
-    print("【43】费用漏斗闭合：收入 × (1 − 各成本率之和) ≈ 营业利润")
+    print("【45】费用漏斗闭合：收入 × (1 − 各成本率之和) ≈ 营业利润")
     passed = failed = 0
     for row in rows:
         try:
@@ -2056,7 +2103,7 @@ def check_non_recurring() -> tuple[int, int]:
     if not quality:
         return 0, 0
 
-    print("【44】非经常性损益：归母净利润 − 扣非净利润，占比可复算")
+    print("【46】非经常性损益：归母净利润 − 扣非净利润，占比可复算")
     passed = failed = 0
     for row in quality:
         try:
@@ -2088,7 +2135,7 @@ def check_toolchain() -> tuple[int, int]:
     """
     import shutil
 
-    print("【45】外部工具链：pdftotext（poppler）可用性")
+    print("【47】外部工具链：pdftotext（poppler）可用性")
     path = shutil.which("pdftotext")
     if path:
         print(f"    pdftotext 已安装：{path}")
@@ -2106,7 +2153,7 @@ def check_panel_columns() -> tuple[int, int]:
     而 akshare 返回的 df 第一列本身就叫「日期」，导致表头 7 列、数据 6 列，
     整张表列错位（「日期」列装的是汇买价）。
     """
-    print("【46】结构完整性：CSV 表头列数 = 数据列数")
+    print("【48】结构完整性：CSV 表头列数 = 数据列数")
     # 只放「纯数值表」：按逗号切分即可判断列数。含中文引号字段（如「元；元」）的表
     # 会被简单切分误判，不进这个列表。
     targets = [
@@ -2131,6 +2178,7 @@ def check_panel_columns() -> tuple[int, int]:
         FIN / "无形资产明细.csv",
         FIN / "子公司与合并范围.csv",
         FIN / "营运效率与现金流.csv",
+        FIN / "单季度经营_2017起.csv",
     ]
     passed = failed = 0
     for path in targets:
@@ -2174,7 +2222,7 @@ def check_jdunion_sort() -> tuple[int, int]:
     if not files:
         return 0, 0
 
-    print("【47】京东联盟排序有效性：原始导出 o30 是否降序")
+    print("【49】京东联盟排序有效性：原始导出 o30 是否降序")
     failed_files: list[tuple[str, float]] = []
     for path in files:
         with path.open(encoding="utf-8-sig") as stream:
@@ -2221,7 +2269,7 @@ def check_hedging() -> tuple[int, int]:
     if not rows:
         return 0, 0
 
-    print("【48】套期保值：三家均提取到数据，期末金额与净资产占比同向")
+    print("【50】套期保值：三家均提取到数据，期末金额与净资产占比同向")
     passed = failed = 0
     grouped: dict[tuple[str, str, str], dict[str, float]] = defaultdict(dict)
     for row in rows:
@@ -2268,7 +2316,7 @@ def check_real_estate() -> tuple[int, int]:
     if not rows:
         return 0, 0
 
-    print("【49】房地产景气指数：月份连续、取值合理")
+    print("【51】房地产景气指数：月份连续、取值合理")
     values: list[tuple[str, float]] = []
     for row in rows:
         try:
@@ -2313,7 +2361,7 @@ def check_data_nature() -> tuple[int, int]:
     if not source:
         return 0, 0
 
-    print("【50】数据性质一致性：CSV 的 actual/forecast 与来源登记不矛盾")
+    print("【52】数据性质一致性：CSV 的 actual/forecast 与来源登记不矛盾")
     nature_of = {r["编号"]: r["数据性质"] for r in source}
     targets = [
         "国庆档期数据.csv",
@@ -2363,7 +2411,7 @@ def check_cross_keyword_dedup() -> tuple[int, int]:
     if not sku:
         return 0, 0
 
-    print("【51】跨检索词去重：同一 SKU 跨关键词重复入库的规模")
+    print("【53】跨检索词去重：同一 SKU 跨关键词重复入库的规模")
     by_sku: dict[str, set[str]] = defaultdict(set)
     for row in sku:
         by_sku[row["SKU"]].add(row["关键词"])
@@ -2524,6 +2572,7 @@ def main() -> int:
         check_intangibles,
         check_subsidiaries,
         check_efficiency_coverage,
+        check_quarterly_long,
         check_brand_normalization,
         check_primary_key_unique,
         check_segment_closure,
