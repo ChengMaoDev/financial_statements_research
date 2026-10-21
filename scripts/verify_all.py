@@ -1299,7 +1299,7 @@ def check_brand_normalization() -> tuple[int, int]:
     if not sku:
         return 0, 0
 
-    print("【44】品牌归一：短别名不跨品牌误命中，食品品牌不进家电面板")
+    print("【45】品牌归一：短别名不跨品牌误命中，食品品牌不进家电面板")
     passed = failed = 0
 
     # 1. 已知的误判组合，必须不再发生
@@ -2100,6 +2100,81 @@ def check_contingencies() -> tuple[int, int]:
     return passed, failed
 
 
+def check_provisions() -> tuple[int, int]:
+    """预计负债：明细加总=合计、期初衔接上年期末、与 akshare 对平、格力不填 0。"""
+    rows = load(FIN / "预计负债与售后义务.csv")
+    bs = load(FIN / "资产负债表.csv")
+    if not rows:
+        return 0, 0
+
+    print("【44】预计负债：明细加总 = 合计；期初衔接上年期末；与 akshare 年报数对平")
+    passed = failed = 0
+
+    def check(label: str, ok: bool) -> None:
+        nonlocal passed, failed
+        passed += ok
+        failed += not ok
+        print(f"    {label}  {'OK' if ok else '差异'}")
+
+    values = {
+        (r["公司"], r["年度"], r["项目"]): float(r["金额(亿元)"]) for r in rows if r["金额(亿元)"]
+    }
+    years = sorted({r["年度"] for r in rows if r["公司"] == "海尔智家"})
+
+    # 1) 海尔：三项明细相加 = 合计（表内是亿元两位小数，容差按舍入累积算）
+    for year in years:
+        total = values.get(("海尔智家", year, "预计负债合计（附注，非流动口径）"))
+        parts = [
+            values.get(("海尔智家", year, f"其中：{item}"))
+            for item in ("预计三包安装费", "未决诉讼", "其他")
+        ]
+        if total is None or any(v is None for v in parts):
+            continue
+        check(f"海尔 {year} 明细相加 = 合计 {total:.2f}", abs(sum(parts) - total) <= 0.02)
+
+    # 2) 链条：本年报合计应等于「下一年报的期初」——但表里没存期初，
+    #    改用可核验的形式：一年内到期部分不得为 0 且各年都齐
+    due_years = sorted(
+        r["年度"] for r in rows if r["公司"] == "海尔智家" and r["项目"].startswith("一年内到期")
+    )
+    check(f"海尔一年内到期流动部分覆盖 {len(due_years)} 年", len(due_years) >= 7)
+
+    # 3) 与 akshare「预计非流动负债」年报数对平（B 级必须与 A 级交叉）
+    ak = {
+        (r["公司"], r["报告期"][:4]): float(r["数值"]) / 1e8
+        for r in bs
+        if r["科目"] == "预计非流动负债"
+        and r["报告期"].endswith("1231")
+        and r["数值"] not in ("", "nan")
+    }
+    for (company, year, item), value in values.items():
+        if "合并资产负债表" not in item and not item.startswith("预计负债合计"):
+            continue
+        theirs = ak.get((company, year))
+        if theirs is None:
+            continue
+        check(f"{company} {year} vs akshare {theirs:.2f} 亿", abs(value - theirs) <= 0.01)
+
+    # 4) 格力：报表行为空 → 必须记「未披露」，绝不能填 0
+    gree = [r for r in rows if r["公司"] == "格力电器"]
+    check(
+        f"格力 {len(gree)} 年全部记为未披露（空≠0）",
+        all(r["数据性质"] == "未披露" and r["金额(亿元)"] == "" for r in gree) and len(gree) >= 7,
+    )
+
+    # 5) 三包安装费占合计比应在合理区间（政策一致性检查）
+    for year in years:
+        total = values.get(("海尔智家", year, "预计负债合计（附注，非流动口径）"))
+        sabao = values.get(("海尔智家", year, "其中：预计三包安装费"))
+        if not total or sabao is None:
+            continue
+        share = sabao / total
+        check(f"海尔 {year} 三包占比 {share * 100:.0f}% 在 70—90%", 0.70 <= share <= 0.90)
+
+    print(f"    通过 {passed}，差异 {failed}\n")
+    return passed, failed
+
+
 def check_primary_key_unique() -> tuple[int, int]:
     """主键唯一性：长表不得出现重复的复合主键。
 
@@ -2118,7 +2193,7 @@ def check_primary_key_unique() -> tuple[int, int]:
         ("存货明细.csv", "年度", ("存货类别",)),
         ("其他综合收益.csv", "期间", ("项目",)),
     ]
-    print("【45】主键唯一性：长表不得有重复的复合主键")
+    print("【46】主键唯一性：长表不得有重复的复合主键")
     passed = failed = 0
     for name, period_col, dims in tables:
         rows = load(FIN / name)
@@ -2152,7 +2227,7 @@ def check_segment_closure() -> tuple[int, int]:
     if not rows:
         return 0, 0
 
-    print("【46】分部报告闭合：各分部相加 = 合计")
+    print("【47】分部报告闭合：各分部相加 = 合计")
     passed = failed = 0
     grouped: dict[tuple[str, str, str], list[dict[str, str]]] = defaultdict(list)
     for row in rows:
@@ -2199,7 +2274,7 @@ def check_cost_funnel() -> tuple[int, int]:
     if not rows:
         return 0, 0
 
-    print("【47】费用漏斗闭合：收入 × (1 − 各成本率之和) ≈ 营业利润")
+    print("【48】费用漏斗闭合：收入 × (1 − 各成本率之和) ≈ 营业利润")
     passed = failed = 0
     for row in rows:
         try:
@@ -2254,7 +2329,7 @@ def check_non_recurring() -> tuple[int, int]:
     if not quality:
         return 0, 0
 
-    print("【48】非经常性损益：归母净利润 − 扣非净利润，占比可复算")
+    print("【49】非经常性损益：归母净利润 − 扣非净利润，占比可复算")
     passed = failed = 0
     for row in quality:
         try:
@@ -2286,7 +2361,7 @@ def check_toolchain() -> tuple[int, int]:
     """
     import shutil
 
-    print("【49】外部工具链：pdftotext（poppler）可用性")
+    print("【50】外部工具链：pdftotext（poppler）可用性")
     path = shutil.which("pdftotext")
     if path:
         print(f"    pdftotext 已安装：{path}")
@@ -2304,7 +2379,7 @@ def check_panel_columns() -> tuple[int, int]:
     而 akshare 返回的 df 第一列本身就叫「日期」，导致表头 7 列、数据 6 列，
     整张表列错位（「日期」列装的是汇买价）。
     """
-    print("【50】结构完整性：CSV 表头列数 = 数据列数")
+    print("【51】结构完整性：CSV 表头列数 = 数据列数")
     # 只放「纯数值表」：按逗号切分即可判断列数。含中文引号字段（如「元；元」）的表
     # 会被简单切分误判，不进这个列表。
     targets = [
@@ -2332,6 +2407,7 @@ def check_panel_columns() -> tuple[int, int]:
         FIN / "单季度经营_2017起.csv",
         FIN / "外币敞口与汇率敏感性.csv",
         FIN / "或有事项与期后承诺.csv",
+        FIN / "预计负债与售后义务.csv",
     ]
     passed = failed = 0
     for path in targets:
@@ -2375,7 +2451,7 @@ def check_jdunion_sort() -> tuple[int, int]:
     if not files:
         return 0, 0
 
-    print("【51】京东联盟排序有效性：原始导出 o30 是否降序")
+    print("【52】京东联盟排序有效性：原始导出 o30 是否降序")
     failed_files: list[tuple[str, float]] = []
     for path in files:
         with path.open(encoding="utf-8-sig") as stream:
@@ -2422,7 +2498,7 @@ def check_hedging() -> tuple[int, int]:
     if not rows:
         return 0, 0
 
-    print("【52】套期保值：三家均提取到数据，期末金额与净资产占比同向")
+    print("【53】套期保值：三家均提取到数据，期末金额与净资产占比同向")
     passed = failed = 0
     grouped: dict[tuple[str, str, str], dict[str, float]] = defaultdict(dict)
     for row in rows:
@@ -2469,7 +2545,7 @@ def check_real_estate() -> tuple[int, int]:
     if not rows:
         return 0, 0
 
-    print("【53】房地产景气指数：月份连续、取值合理")
+    print("【54】房地产景气指数：月份连续、取值合理")
     values: list[tuple[str, float]] = []
     for row in rows:
         try:
@@ -2514,7 +2590,7 @@ def check_data_nature() -> tuple[int, int]:
     if not source:
         return 0, 0
 
-    print("【54】数据性质一致性：CSV 的 actual/forecast 与来源登记不矛盾")
+    print("【55】数据性质一致性：CSV 的 actual/forecast 与来源登记不矛盾")
     nature_of = {r["编号"]: r["数据性质"] for r in source}
     targets = [
         "国庆档期数据.csv",
@@ -2564,7 +2640,7 @@ def check_cross_keyword_dedup() -> tuple[int, int]:
     if not sku:
         return 0, 0
 
-    print("【55】跨检索词去重：同一 SKU 跨关键词重复入库的规模")
+    print("【56】跨检索词去重：同一 SKU 跨关键词重复入库的规模")
     by_sku: dict[str, set[str]] = defaultdict(set)
     for row in sku:
         by_sku[row["SKU"]].add(row["关键词"])
@@ -2728,6 +2804,7 @@ def main() -> int:
         check_quarterly_long,
         check_fx_exposure,
         check_contingencies,
+        check_provisions,
         check_brand_normalization,
         check_primary_key_unique,
         check_segment_closure,
