@@ -1,0 +1,31 @@
+[project]
+name = "financial-statements-research"
+version = "0.1.0"
+description = "白色家电三家上市公司（美的/海尔/格力）财务与市场数据采集、结构化与交叉校验"
+requires-python = ">=3.11"
+dependencies = [
+    "akshare>=1.16",
+    "requests>=2.31",
+    "beautifulsoup4>=4.12",
+]
+
+[project.optional-dependencies]
+# 电商采集依赖已登录的浏览器会话，单独装
+ecommerce = [
+    "playwright>=1.40",
+]
+
+[tool.uv]
+# 采集脚本是命令式脚本，不打包成库
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
+ignore = [
+    "E501",  # 行长由 formatter 处理
+    "RUF001", "RUF002", "RUF003",  # 中文全角标点
+]

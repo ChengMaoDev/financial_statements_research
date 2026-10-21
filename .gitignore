@@ -1,0 +1,8 @@
+.DS_Store
+Thumbs.db
+*.tmp
+__pycache__/
+.venv/
+.ruff_cache/
+.playwright-mcp/
+.auth/
