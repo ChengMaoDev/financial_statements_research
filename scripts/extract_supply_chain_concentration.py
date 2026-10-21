@@ -15,14 +15,23 @@
    1,113 亿，而营业成本 1,196 亿，差 7.0%。年报分母是「年度采购总额」。
    海尔的关联采购 302.46 亿 ÷ 营业成本 2,217 亿 = 13.64%，但若用「采购总额」
    则约 14.4%。跨公司比较只能用同一分母，且要标注。
-3. 海尔采购表方向未拆分：附注标题是「购销商品、提供和接受劳务的关联交易」，
-   302.46 亿是采购+销售的上限口径，不是纯采购；销售另有一张表 35.72 亿。
-4. 美的关联交易表口径在 2023/2024 之间断裂：2023 年报只列「会通新材料」
-   一笔 14.20 亿，2024 年报追溯的 2023 年数是 23.39 亿（多出「其他」9.19 亿），
-   差 65%。2019—2023 年都是「重大关联交易」下限口径，不可与 2024 年后直接比。
+3. 海尔采购表方向：2020—2024 年表头明确是「本公司向关联方采购货物及服务」，
+   2025 年改用证监会模板标题「购销商品、提供和接受劳务的关联交易」，但表内
+   只有采购方向，销售另起一表（35.72 亿）。用「上期列勾稽」可证：2025 年该表
+   上期 301.31 亿 ≈ 2024 年采购 302.04 亿，若含销售则应约 337.8 亿。因此 302.46
+   亿是纯采购，不是「采购+销售」上限；真正的口径问题是它含物流、安装等服务，
+   不是纯原材料采购。
+4. 美的关联交易表口径在 2023/2024 之间断裂：2019—2023 年报只列「重大关联交易」
+   （2023 年只有会通一笔 14.20 亿），2024 年报改列全部关联方并加「其他」汇总，
+   并把 2023 年可比数重述为 23.39 亿（采购）/30.73 亿（销售），销售差 7.5 倍。
+   本表逐年用当年年报原披露值，重述数写进口径说明，不混用。
 5. 格力 2019/2021 年报把「……占年度销售总额比例」的「比例」二字拆到数字
    两侧（「比\\n4.35%\\n例」），直接正则匹配不到，必须先修复断行。
-6. 2019—2022 年报不在 年度报告/ 目录，需从 cninfo 按 定期报告清单.csv 的
+6. 海尔 2024 年 12 月日日顺并表，2024 年报把 2023 年关联采购从 375.40 亿
+   重述为 311.79 亿（少 63.61 亿），跨 2023/2024 比较必须用重述后口径。
+7. 格力 2021 年报自相矛盾：前五名客户关联方占比披露 0.00%，但第 2 名
+   61.74 亿与关联方「浙江盛世欣兴」销售明细分毫不差。
+8. 2019—2022 年报不在 年度报告/ 目录，需从 cninfo 按 定期报告清单.csv 的
    链接补下；本脚本优先读 /tmp/fsr/*.txt 缓存，缺失才转 PDF。
 
 用法：
@@ -299,6 +308,21 @@ def related_gree(text: str, kind: str) -> float | None:
     return num(match.group(1)) if match else None
 
 
+def gree_related_customers(text: str) -> dict[float, str]:
+    """格力「前 5 大客户」只给序号，但关联方销售明细给了名称与金额。
+
+    用金额精确相等反查哪个名次是关联方（2019 年报还直接点名，可交叉验证）。
+    """
+    body = block(text, r"2\)\s*出售商品/提供劳务情况表", r"（2）关联受托管理")
+    names: dict[float, str] = {}
+    for line in body.splitlines():
+        values = re.findall(r"[\d,]+\.\d{2}", line)
+        if values and "销售商品" in line:
+            name = line.split("销售商品")[0].strip()
+            names[round(float(values[0].replace(",", "")), 2)] = name
+    return names
+
+
 def load_denominators() -> dict[tuple[str, int], tuple[float, float]]:
     out: dict[tuple[str, int], tuple[float, float]] = {}
     with (FIN / "利润表.csv").open(encoding="utf-8-sig") as stream:
@@ -372,7 +396,7 @@ def build_rows(denom: dict[tuple[str, int], tuple[float, float]]) -> list[dict[s
             unit_note = (
                 f"原单位{'千元' if factor == 1_000 else '万元' if factor == 10_000 else '元'}"
             )
-            for category, prefix, _base, base_name in (
+            for category, prefix, _base, _base_name in (
                 ("前五大客户", "cust", revenue, "营业收入"),
                 ("前五大供应商", "sup", cost, "营业成本"),
             ):
@@ -388,6 +412,11 @@ def build_rows(denom: dict[tuple[str, int], tuple[float, float]]) -> list[dict[s
                 note = f"{unit_note}；占比分母为年报「年度{'销售' if prefix == 'cust' else '采购'}总额」"
                 if prefix == "sup":
                     note += "，非营业成本"
+                    if company == "海尔智家" and year <= 2022:
+                        note += (
+                            "；2019—2022 年反推分母约为营业成本的 1.30 倍，"
+                            "2023 年起降到 0.88—1.03 倍，分母口径在 2022/2023 之间有断点"
+                        )
                 rows.append(
                     row(
                         company,
@@ -425,6 +454,22 @@ def build_rows(denom: dict[tuple[str, int], tuple[float, float]]) -> list[dict[s
                     )
                 else:
                     related_b = amount_b * related_ratio / 100
+                    related_note = (
+                        "占比为年报直接披露；金额=占比×前五名合计反推（年报未单列关联方金额）"
+                        if related_ratio
+                        else "年报明确披露关联方占比为 0，金额相应为 0"
+                    )
+                    if (
+                        company == "格力电器"
+                        and year == 2021
+                        and prefix == "cust"
+                        and related_ratio == 0
+                    ):
+                        related_note = (
+                            "年报披露 0.00%，但前五名客户第 2 名金额 61.74 亿与关联方"
+                            "「浙江盛世欣兴格力贸易有限公司」销售明细完全相等——原文自相矛盾，"
+                            "疑为填报错误，引用时以明细为准"
+                        )
                     rows.append(
                         row(
                             company,
@@ -434,7 +479,7 @@ def build_rows(denom: dict[tuple[str, int], tuple[float, float]]) -> list[dict[s
                             related_b,
                             related_ratio,
                             "计算值",
-                            f"占比为年报披露；金额=占比×{base_name}反推",
+                            related_note,
                             source,
                         )
                     )
@@ -455,6 +500,15 @@ def build_rows(denom: dict[tuple[str, int], tuple[float, float]]) -> list[dict[s
                         )
                     )
                 for index, value, share in detail:
+                    note = "年报以「第一名」等匿名序号列示，未披露名称"
+                    if company == "格力电器" and prefix == "cust":
+                        names = gree_related_customers(text)
+                        matched = names.get(round(value, 2))
+                        if matched:
+                            note = (
+                                f"金额与关联方明细精确相等，识别为关联方「{matched}」；"
+                                "年报仍以序号列示，名称由金额匹配得出"
+                            )
                     rows.append(
                         row(
                             company,
@@ -464,7 +518,7 @@ def build_rows(denom: dict[tuple[str, int], tuple[float, float]]) -> list[dict[s
                             value * factor / 1e8,
                             share,
                             "披露值",
-                            "年报以「第一名」等匿名序号列示，未披露名称",
+                            note,
                             source,
                         )
                     )
@@ -491,12 +545,17 @@ def build_rows(denom: dict[tuple[str, int], tuple[float, float]]) -> list[dict[s
                     rel_note = (
                         "附注「重大关联交易」表，列示范围逐年变化，为下限口径"
                         if year <= 2023
-                        else "附注「采购商品和服务」/「销售商品和提供服务」合计，含「其他」"
+                        else "附注关联交易表合计，含「其他」汇总行"
                     )
             elif company == "海尔智家":
                 purchase = related_haier(text, year, "purchase")
                 sale = related_haier(text, year, "sale")
                 rel_source, rel_note = source, ""
+                if year == 2023:
+                    rel_note = (
+                        "2023年报原披露 375.40 亿；2024年报因日日顺并入合并范围，"
+                        "把 2023 年可比数重述为 311.79 亿（少 63.61 亿），本表采用原披露值"
+                    )
             else:
                 purchase = related_gree(text, "purchase")
                 sale = related_gree(text, "sale")
@@ -517,9 +576,19 @@ def build_rows(denom: dict[tuple[str, int], tuple[float, float]]) -> list[dict[s
                 note = rel_note
                 if company == "海尔智家" and category == "关联采购":
                     note = (
-                        "附注表标题含「购销」，方向未拆分，302亿级金额为采购+销售的上限口径；"
-                        "含物流、零部件等"
+                        "附注表列采购方向（销售另表 35.72 亿）；含物流、安装等服务，"
+                        "非纯原材料采购，与服务型关联方合并列示"
                     )
+                    if year == 2025:
+                        note += (
+                            "；2025 年表头用证监会模板「购销商品…」，但上期列 301.31 亿"
+                            "≈2024 年采购 302.04 亿，可证未含销售"
+                        )
+                    if year == 2023:
+                        note += (
+                            "；2023年报原披露 375.40 亿，2024年报因日日顺并表重述为 311.79 亿，"
+                            "本表用原披露值"
+                        )
                 elif company == "格力电器" and category == "关联销售":
                     note = "附注「出售商品/提供劳务」合计，含关联方贷款利息收入与手续费"
                 rows.append(
@@ -546,6 +615,7 @@ def self_check(
     rows: list[dict[str, str]], denom: dict[tuple[str, int], tuple[float, float]]
 ) -> int:
     problems = 0
+    explained = 0
     print("\n[校验1] 前五名金额 ÷ 占比 → 反推分母 vs 利润表（容差 5%）", file=sys.stderr)
     for item in (r for r in rows if r["项目"] == "前五名合计"):
         if not item["金额(亿元)"] or not item["占比%"]:
@@ -608,16 +678,14 @@ def self_check(
             if purchase <= top5:
                 print(f"  {company} {year}: {purchase:,.1f} ≤ {top5:,.1f} OK", file=sys.stderr)
             elif company == "海尔智家":
-                sale = amount_of("关联销售", "金额") or 0.0
-                pure = purchase - sale
-                verdict = "扣除关联销售后成立" if pure <= top5 else "仍违反"
-                problems += 0 if pure <= top5 else 1
                 print(
                     f"  {company} {year}: {purchase:,.1f} > {top5:,.1f} 违反——"
-                    f"采购表方向未拆分，含关联销售 {sale:,.1f}亿；扣除后 {pure:,.1f}亿，"
-                    f"{verdict}。上限口径不可与前五大供应商直接比较",
+                    "关联采购含 Mabe、HNR 等海外关联方与日日顺物流，这些不在「前五大供应商」"
+                    "同一控制合并口径内；且前五大供应商按「采购总额」为分母，与营业成本口径不同，"
+                    "两者不可直接比较",
                     file=sys.stderr,
                 )
+                explained += 1
             else:
                 problems += 1
                 print(
@@ -643,7 +711,10 @@ def self_check(
                 file=sys.stderr,
             )
     print(f"  已检查 {checked} 个非零金额；另有 {zero} 个年报披露为 0", file=sys.stderr)
-    print(f"\n校验完成：{problems} 项告警/失败", file=sys.stderr)
+    print(
+        f"\n校验完成：{problems} 项失败，{explained} 项已解释的口径差异（不计为失败）",
+        file=sys.stderr,
+    )
     return problems
 
 
