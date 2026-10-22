@@ -289,6 +289,7 @@ def row(
     nature: str,
     note: str,
     source: str,
+    amount_yuan: float | None = None,
 ) -> dict[str, str]:
     return {
         "公司": company,
@@ -300,6 +301,7 @@ def row(
         "数据性质": nature,
         "口径说明": note,
         "来源": source,
+        "金额(元)": "" if amount_yuan is None else f"{amount_yuan:.2f}",
     }
 
 
@@ -368,6 +370,7 @@ def build_rows(denom: dict[tuple[str, int], tuple[float, float]]) -> list[dict[s
                         "披露值",
                         note,
                         source,
+                        amount_yuan=amount * factor,
                     )
                 )
 
@@ -405,6 +408,7 @@ def build_rows(denom: dict[tuple[str, int], tuple[float, float]]) -> list[dict[s
                             "披露值",
                             "金额与占比均为年报直接披露",
                             source,
+                            amount_yuan=disclosed_amount * factor,
                         )
                     )
                 else:
@@ -429,6 +433,7 @@ def build_rows(denom: dict[tuple[str, int], tuple[float, float]]) -> list[dict[s
                             "计算值",
                             related_note,
                             source,
+                            amount_yuan=amount * factor * related_ratio / ratio,
                         )
                     )
 
@@ -460,6 +465,7 @@ def build_rows(denom: dict[tuple[str, int], tuple[float, float]]) -> list[dict[s
                             "披露值",
                             note,
                             source,
+                            amount_yuan=value * factor,
                         )
                     )
 
@@ -660,7 +666,18 @@ def main() -> int:
     denom = load_denominators()
     rows = build_rows(denom)
 
-    fields = ["公司", "年度", "类别", "项目", "金额(亿元)", "占比%", "数据性质", "口径说明", "来源"]
+    fields = [
+        "公司",
+        "年度",
+        "类别",
+        "项目",
+        "金额(亿元)",
+        "占比%",
+        "数据性质",
+        "口径说明",
+        "来源",
+        "金额(元)",
+    ]
     with OUT.open("w", encoding="utf-8-sig", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=fields, lineterminator="\n")
         writer.writeheader()

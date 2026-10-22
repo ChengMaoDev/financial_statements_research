@@ -57,6 +57,8 @@ def snapshot(path: Path) -> Snapshot:
             count += 1
     if not count:
         raise ValueError(f"{path.name} 没有数据行")
+    if duplicates:
+        raise ValueError(f"{path.name} 含 {duplicates} 行完全重复记录")
     return Snapshot(
         columns=header,
         rows=count,

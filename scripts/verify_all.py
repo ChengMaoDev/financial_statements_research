@@ -360,14 +360,16 @@ def check_inventory() -> tuple[int, int]:
 
 def check_concentration() -> tuple[int, int]:
     """前五大客户金额 / 占比 反推营业收入，验证两个披露值互相自洽。"""
-    concentration = load(FIN / "客户供应商集中度.csv")
+    concentration = load(FIN / "供应商客户集中度时序.csv")
     if not concentration:
         return 0, 0
 
     print("【8】前五大客户：金额 / 占比 反推营业收入")
     print(f"    {'公司':<8}{'年度':<6}{'反推营收(亿)':>14}{'实际营收(亿)':>14}{'差异%':>9}")
     passed = failed = 0
-    rows = {(r["公司"], r["年度"], r["维度"]): r for r in concentration}
+    rows = {
+        (r["公司"], r["年度"], r["类别"]): r for r in concentration if r["项目"] == "前五名合计"
+    }
     income = load(FIN / "利润表.csv")
     revenue = {
         (r["公司"], r["报告期"][:4]): float(r["数值"])
@@ -375,11 +377,11 @@ def check_concentration() -> tuple[int, int]:
         if r["科目"] == "营业收入" and r["报告期"].endswith("1231")
     }
     for (company, year, dimension), row in rows.items():
-        if dimension != "客户":
+        if dimension != "前五大客户":
             continue
-        if not row["前五名金额"] or not row["占总额比例%"]:
+        if not row["金额(元)"] or not row["占比%"]:
             continue
-        implied = float(row["前五名金额"]) / (float(row["占总额比例%"]) / 100)
+        implied = float(row["金额(元)"]) / (float(row["占比%"]) / 100)
         actual = revenue.get((company, year))
         if not actual:
             continue
@@ -2927,27 +2929,38 @@ def check_data_nature() -> tuple[int, int]:
 
 
 def check_cross_keyword_dedup() -> tuple[int, int]:
-    """明细保留检索词观测，组内型号数必须按唯一 SKU 核对。"""
+    """跨词相同商品字段只保留一条，合并行保留完整检索来源。"""
+    import json
+
     sku = load(ECO / "京东联盟_SKU明细.csv")
     if not sku:
         return 0, 0
 
-    print("【58】跨检索词去重：同一 SKU 跨关键词重复入库的规模")
-    by_sku: dict[str, set[str]] = defaultdict(set)
+    print("【58】跨检索词去重：商品字段唯一，检索来源可追溯")
+    seen: set[tuple[tuple[str, str], ...]] = set()
+    passed = failed = 0
+    original_count = 0
     for row in sku:
-        by_sku[row["SKU"]].add(row["关键词"])
-
-    cross = {k: v for k, v in by_sku.items() if len(v) > 1}
-    dup_rows = sum(len(v) for v in cross.values())
-    total = len(sku)
-
+        identity = tuple(
+            (k, v)
+            for k, v in row.items()
+            if k not in {"关键词", "页码", "来源文件", "检索观测来源"}
+        )
+        origins = json.loads(row["检索观测来源"])
+        ok = identity not in seen and bool(origins)
+        ok = ok and set(row["关键词"].split(";")) == {r["关键词"] for r in origins}
+        ok = ok and set(row["来源文件"].split(";")) == {r["来源文件"] for r in origins}
+        ok = ok and set(row["页码"].split(";")) == {r["页码"] for r in origins}
+        seen.add(identity)
+        original_count += len(origins)
+        passed += ok
+        failed += not ok
+        if not ok:
+            print(f"    重复或来源不符：{row['SKU']} {row['采集时间']}")
     print(
-        f"    唯一 SKU {len(by_sku)} / 明细 {total} 行；"
-        f"跨词重复 {len(cross)} 个 SKU、涉及 {dup_rows} 行"
-        f"（占 {dup_rows / total * 100:.1f}%）"
+        f"    {len(sku)} 条去重明细，保留 {original_count} 条原检索观测；通过 {passed}，失败 {failed}\n"
     )
-    print("    明细保留不同检索词观测；组内 SKU 已去重，见衍生指标校验\n")
-    return 1, 0
+    return passed, failed
 
 
 def check_goodwill_assumptions() -> tuple[int, int]:
