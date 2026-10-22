@@ -338,13 +338,15 @@ def main() -> int:
                     continue
     add_row("人均薪酬", "万元", salary_rows)
 
-    # 集中度：客户供应商集中度.csv
+    # 集中度统一使用含逐户明细与原值的时序表。
     concentration: dict[str, dict[str, str]] = {}
-    with (DATA / "客户供应商集中度.csv").open(encoding="utf-8-sig") as stream:
+    with (DATA / "供应商客户集中度时序.csv").open(encoding="utf-8-sig") as stream:
         for row in csv.DictReader(stream):
-            if row["年度"] != "2025" or row["维度"] not in ("客户", "供应商"):
+            if row["年度"] != "2025" or row["项目"] != "前五名合计":
                 continue
-            concentration.setdefault(row["公司"], {})[row["维度"]] = row["占总额比例%"]
+            dimension = {"前五大客户": "客户", "前五大供应商": "供应商"}.get(row["类别"])
+            if dimension is not None:
+                concentration.setdefault(row["公司"], {})[dimension] = row["占比%"]
     add_row(
         "前五大客户集中度",
         "%",
@@ -413,7 +415,7 @@ def main() -> int:
 
     # 毛利率季节性：Q4 单季 vs 全年
     q4: dict[str, str] = {}
-    q4_path = DATA / "分季度盈利能力.csv"
+    q4_path = DATA / "单季度经营_2023起.csv"
     if q4_path.exists():
         with q4_path.open(encoding="utf-8-sig") as stream:
             for row in csv.DictReader(stream):

@@ -347,6 +347,35 @@ def main() -> int:
         group_rows,
     )
 
+    # 同日同品类商品字段完全相同时合并跨词重复，原始检索位置单独保留。
+    identical: dict[tuple[tuple[str, str], ...], list[dict[str, object]]] = {}
+    for observation in sku_rows:
+        identity = tuple(
+            (field, str(value))
+            for field, value in observation.items()
+            if field not in {"keyword", "page", "source_file"}
+        )
+        identical.setdefault(identity, []).append(observation)
+    merged_rows: list[dict[str, object]] = []
+    for observations in identical.values():
+        first = observations[0]
+        merged_rows.append(
+            {
+                **first,
+                "keyword": ";".join(sorted({str(r["keyword"]) for r in observations})),
+                "page": ";".join(sorted({str(r["page"]) for r in observations})),
+                "source_file": ";".join(sorted({str(r["source_file"]) for r in observations})),
+                "origins": json.dumps(
+                    [
+                        {"关键词": r["keyword"], "页码": r["page"], "来源文件": r["source_file"]}
+                        for r in observations
+                    ],
+                    ensure_ascii=False,
+                    separators=(",", ":"),
+                ),
+            }
+        )
+
     sku_export = [
         [
             str(r["category"]),
@@ -367,8 +396,9 @@ def main() -> int:
             str(r["collected"]),
             str(r["coupon"]),
             *enrich("jd", str(r["sku"]), str(r["name"])),
+            str(r["origins"]),
         ]
-        for r in sku_rows
+        for r in merged_rows
     ]
     write(
         OUT_SKU,
@@ -391,12 +421,14 @@ def main() -> int:
             "采集时间",
             "优惠券标记_原始",
             *FIELDS,
+            "检索观测来源",
         ],
         sku_export,
     )
 
     stamp = datetime.now().isoformat(timespec="seconds")
-    print(f"原始 {len(raw)} 条 → SKU 明细 {len(sku_rows)} 条 → 组级观测 {len(group_rows)} 条")
+    print(f"原始 {len(raw)} 条 → SKU明细 {len(merged_rows)} 条 → 组级观测 {len(group_rows)} 条")
+    print(f"合并商品字段相同的跨词重复 {len(sku_rows) - len(merged_rows)} 行，检索来源完整保留")
     print(f"剔除非商品条目 {dropped} 条（家政服务/配件/食品）")
     print(f"写入 {OUT_GROUP.relative_to(ROOT)}")
     print(f"写入 {OUT_SKU.relative_to(ROOT)}（{stamp}）")
