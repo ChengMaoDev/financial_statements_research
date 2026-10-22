@@ -52,6 +52,11 @@ def load() -> dict[tuple[str, str], dict[str, float]]:
 
 def main() -> int:
     data = load()
+    with (FIN / "分季度经营.csv").open(encoding="utf-8-sig") as stream:
+        disclosed = {
+            (row["公司"], row["年度"], row["季度"], row["指标"]): float(row["数值"])
+            for row in csv.DictReader(stream)
+        }
     rows: list[list[str]] = []
     for company in COMPANIES:
         for year in YEARS:
@@ -67,17 +72,24 @@ def main() -> int:
                 )
                 if revenue <= 0:
                     continue
+                restated = label == "Q4" and company == "海尔智家" and year == "2024"
+                if restated:
+                    revenue = disclosed[(company, year, label, "营业收入")]
+                    profit = disclosed[(company, year, label, "归母净利润")]
                 rows.append(
                     [
                         company,
                         year,
                         label,
                         f"{revenue / 1e8:.2f}",
-                        f"{cost / 1e8:.2f}",
-                        f"{(revenue - cost) / revenue * 100:.2f}",
+                        "" if restated else f"{cost / 1e8:.2f}",
+                        "" if restated else f"{(revenue - cost) / revenue * 100:.2f}",
                         f"{profit / 1e8:.2f}",
                         f"{profit / revenue * 100:.2f}",
-                        "计算值",
+                        "披露值/计算值" if restated else "计算值",
+                        "收入和归母采用年报分季披露；已删除版本混用的成本及毛利率"
+                        if restated
+                        else "利润表累计相减；未独立核验各累计报告的版本一致性",
                     ]
                 )
 
@@ -91,6 +103,7 @@ def main() -> int:
         "单季归母净利润(亿)",
         "单季净利率%",
         "数据性质",
+        "口径说明",
     ]
     with OUT.open("w", encoding="utf-8-sig", newline="") as stream:
         writer = csv.writer(stream, lineterminator="\n")
@@ -103,7 +116,7 @@ def main() -> int:
     for row in rows:
         print(
             f"{row[0]:<8}{row[1]:<6}{row[2]:<5}{float(row[3]):>10.1f}"
-            f"{float(row[5]):>9.1f}{float(row[7]):>9.1f}"
+            f"{row[5] or '不可得':>9}{float(row[7]):>9.1f}"
         )
     print(f"\n写入 {OUT.relative_to(ROOT)}: {len(rows)} 行")
     return 0

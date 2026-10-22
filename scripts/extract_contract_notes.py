@@ -72,14 +72,14 @@ import argparse
 import csv
 import itertools
 import re
-import subprocess
 import sys
 from pathlib import Path
+
+from pdf_util import pdf_text
 
 ROOT = Path(__file__).resolve().parent.parent
 FIN = ROOT / "财务数据"
 OUT = FIN / "合同资产与合同负债附注.csv"
-CACHE = Path("/tmp/fsr")
 
 YEARS = [str(y) for y in range(2020, 2026)]
 
@@ -121,17 +121,7 @@ CELL = re.compile(r"\S+")
 
 
 def text_of(year: str) -> str:
-    cached = CACHE / f"美的{year}.txt"
-    if cached.exists():
-        return cached.read_text(encoding="utf-8")
-    result = subprocess.run(
-        ["pdftotext", "-layout", str(ROOT / "年度报告" / f"美的{year}.pdf"), "-"],
-        capture_output=True,
-        text=True,
-        timeout=300,
-        check=False,
-    )
-    return result.stdout
+    return pdf_text(ROOT / "年度报告" / f"美的{year}.pdf")
 
 
 def number(token: str) -> float | None:

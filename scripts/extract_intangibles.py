@@ -72,8 +72,9 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+from pdf_util import pdf_text
+
 ROOT = Path(__file__).resolve().parent.parent
-CACHE = Path("/tmp/fsr")
 FIN = ROOT / "财务数据"
 OUT = FIN / "无形资产明细.csv"
 
@@ -214,20 +215,7 @@ BOOK_GAP: dict[tuple[str, str], tuple[float, str]] = {
 
 
 def text_of(pdf: str) -> str:
-    """优先用 /tmp/fsr 的 pdftotext -layout 缓存，缺了才重新转 PDF。"""
-    cached = CACHE / f"{Path(pdf).stem}.txt"
-    if cached.exists():
-        return cached.read_text(encoding="utf-8")
-    import subprocess
-
-    result = subprocess.run(
-        ["pdftotext", "-layout", str(ROOT / "年度报告" / pdf), "-"],
-        capture_output=True,
-        text=True,
-        timeout=300,
-        check=False,
-    )
-    return result.stdout
+    return pdf_text(ROOT / "年度报告" / pdf)
 
 
 def number(token: str) -> float:

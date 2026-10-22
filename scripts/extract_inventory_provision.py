@@ -47,9 +47,10 @@ from __future__ import annotations
 import argparse
 import csv
 import re
-import subprocess
 import sys
 from pathlib import Path
+
+from pdf_util import pdf_text
 
 ROOT = Path(__file__).resolve().parent.parent
 PDF_DIR = ROOT / "年度报告"
@@ -75,20 +76,6 @@ NORMALIZE = {
 
 NUMBER = re.compile(r"\(?-?[\d,]+(?:\.\d+)?\)?")
 SPLIT = re.compile(r"\s{2,}")
-
-
-def pdf_text(pdf: Path) -> str:
-    cached = Path("/tmp/fsr") / f"{pdf.stem}.txt"
-    if cached.exists():
-        return cached.read_text(encoding="utf-8")
-    result = subprocess.run(
-        ["pdftotext", "-layout", str(pdf), "-"],
-        capture_output=True,
-        text=True,
-        timeout=300,
-        check=False,
-    )
-    return result.stdout
 
 
 def number(token: str) -> float:

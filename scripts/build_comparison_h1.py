@@ -276,9 +276,7 @@ def main() -> int:
         "海外收入占比",
         "%",
         {
-            c: (
-                f"{region[(c, '海外')] / (region[(c, '海外')] + region.get((c, '国内'), 1)) * 100:.2f}"
-            )
+            c: (f"{region[(c, '海外')] / income[(c, PERIOD, '营业收入')] * 100:.2f}")
             for c in COMPANIES
             if (c, "海外") in region
         },

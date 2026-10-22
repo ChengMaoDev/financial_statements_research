@@ -61,9 +61,10 @@ import subprocess
 import sys
 from pathlib import Path
 
+from pdf_util import pdf_text
+
 ROOT = Path(__file__).resolve().parent.parent
 PDF_DIR = ROOT / "年度报告"
-CACHE = Path("/tmp/fsr")
 FIN = ROOT / "财务数据"
 OUT = FIN / "子公司与合并范围.csv"
 
@@ -310,10 +311,7 @@ def clean_rows(rows: list[dict]) -> list[dict]:
 
 def find_pages(short: str, year: str) -> tuple[int, int]:
     """定位「企业集团的构成」所在页，向后多取 6 页以覆盖跨页长表。"""
-    cache = CACHE / f"{short}{year}.txt"
-    if not cache.exists():
-        raise SystemExit(f"缺少文本缓存 {cache}，请先 pdftotext -layout 生成")
-    for idx, page in enumerate(cache.read_text(encoding="utf-8").split("\f")):
+    for idx, page in enumerate(pdf_text(PDF_DIR / f"{short}{year}.pdf").split("\f")):
         if "企业集团的构成" in page or "主要子公司的构成" in page:
             return idx + 1, idx + 7
     raise SystemExit(f"{short}{year} 未找到「企业集团的构成」")
@@ -474,7 +472,7 @@ def build() -> list[list[str]]:
         short = SHORT[company]
         for year in YEARS:
             first, last = find_pages(short, year)
-            pages = (CACHE / f"{short}{year}.txt").read_text(encoding="utf-8").split("\f")
+            pages = pdf_text(PDF_DIR / f"{short}{year}.pdf").split("\f")
             rows = clean_rows(
                 parse_table(PDF_DIR / f"{short}{year}.pdf", first, last, KIND[company])
             )

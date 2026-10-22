@@ -139,21 +139,10 @@ def fetch_pledge(ak) -> None:
 
 
 def fetch_holders_detail(ak) -> None:
-    """股东户数详情（户均持股、筹码集中度）。"""
-    rows: list[list[str]] = []
-    for code, (name, _) in COMPANIES.items():
-        try:
-            df = ak.stock_zh_a_gdhs_detail_em(symbol=code)
-        except Exception as exc:
-            print(f"  {name} 股东户数失败: {exc}", file=sys.stderr)
-            continue
-        if df is None or df.empty:
-            continue
-        for _, record in df.iterrows():
-            rows.append([name, code] + [clean(record.get(c)) for c in df.columns])
-    header = ["公司", "股票代码", *list(df.columns)] if rows else []
-    write_rows(OUT / "股东户数明细.csv", header, rows)
-    print(f"  股东户数明细: {len(rows)} 行")
+    """股东户数只保存在财务数据目录，复用同一采集入口。"""
+    from fetch_akshare_extended import fetch_holders
+
+    fetch_holders(ak)
 
 
 def main() -> int:
