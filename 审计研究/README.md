@@ -36,3 +36,5 @@ python -X utf8 scripts/verify_all.py
 ```
 
 采集与生成代码保留在 `scripts/`。原有 `年度报告/`、`H股年报/`、`D股年报/`中的财报通过清单引用；整理前已保存的原件及检索证据内容保持原样。
+
+审计中间材料的JSON/HTML按原始字节保存，`.gitattributes`禁止Git转换换行。已恢复曾被转成LF的210份JSON及两份网页，逐份精确匹配既有SHA-256，原哈希记录未改；国卫网页含混合换行。`uv run python scripts/restore_audit_evidence.py`可离线检查，仅`--apply`允许恢复且必须先通过原哈希。PDF文本缓存位于系统临时目录的`opencode/audit-collection/`，不写入仓库。

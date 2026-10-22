@@ -4,23 +4,23 @@ Downloads are staged separately. Inspect/review their content before archiving.
 No original or existing derivative is overwritten. Uses only the Python standard
 library and Poppler; document review decisions are recorded in the collection plan.
 """
+
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
-import os
 import re
 import shutil
 import subprocess
 import sys
 import tempfile
 from collections import Counter
-from html.parser import HTMLParser
 from datetime import datetime, timedelta, timezone
+from html.parser import HTMLParser
 from pathlib import Path
-from urllib.request import Request, urlopen
 from urllib.parse import quote, urlencode, urljoin, urlsplit, urlunsplit
+from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parent.parent
 WORK = Path(tempfile.gettempdir()) / "financial-report-collection-20261017"
@@ -43,8 +43,9 @@ def save(path, value):
 
 
 def pages(path):
-    run = subprocess.run(["pdftotext", "-layout", str(path), "-"], check=True,
-                         capture_output=True, encoding="utf-8")
+    run = subprocess.run(
+        ["pdftotext", "-layout", str(path), "-"], check=True, capture_output=True, encoding="utf-8"
+    )
     result = run.stdout.split("\f")
     if result and not result[-1].strip():
         result.pop()
@@ -70,23 +71,42 @@ def inspect(path, output):
     for label, pattern in PATTERNS.items():
         rx = re.compile(pattern, re.I)
         hits = []
-        for number, (text, squeezed) in enumerate(zip(texts, compact), 1):
+        for number, (text, squeezed) in enumerate(zip(texts, compact, strict=True), 1):
             match = rx.search(text) or rx.search(squeezed)
             if match:
                 hits.append({"pdf_page": number, "match": match.group(0)[:100]})
         matches[label] = hits
-    info = subprocess.run(["pdfinfo", str(path)], capture_output=True, encoding="utf-8", errors="replace")
-    value = {"path": str(path), "bytes": path.stat().st_size, "sha256": sha(path),
-             "pages": len(texts), "pdfinfo": info.stdout, "pdfinfo_exit": info.returncode,
-             "front": "\n\f\n".join(texts[:5])[:18000], "last_page": texts[-1][-4000:],
-             "matches": matches, "inspected_at": stamp()}
+    info = subprocess.run(
+        ["pdfinfo", str(path)], capture_output=True, encoding="utf-8", errors="replace"
+    )
+    value = {
+        "path": str(path),
+        "bytes": path.stat().st_size,
+        "sha256": sha(path),
+        "pages": len(texts),
+        "pdfinfo": info.stdout,
+        "pdfinfo_exit": info.returncode,
+        "front": "\n\f\n".join(texts[:5])[:18000],
+        "last_page": texts[-1][-4000:],
+        "matches": matches,
+        "inspected_at": stamp(),
+    }
     last = next(((i, t) for i, t in reversed(list(enumerate(texts, 1))) if t.strip()), (0, ""))
     value["last_nonblank_page"] = last[0]
     value["last_nonblank_excerpt"] = last[1][-2000:]
     save(output, value)
-    print(json.dumps({"file": path.name, "pages": len(texts), "bytes": value["bytes"],
-                      "categories": {k: [v["pdf_page"] for v in vals[:8]] for k, vals in matches.items()},
-                      "inspection": str(output)}, ensure_ascii=False))
+    print(
+        json.dumps(
+            {
+                "file": path.name,
+                "pages": len(texts),
+                "bytes": value["bytes"],
+                "categories": {k: [v["pdf_page"] for v in vals[:8]] for k, vals in matches.items()},
+                "inspection": str(output),
+            },
+            ensure_ascii=False,
+        )
+    )
 
 
 def fetch(url, name, is_pdf):
@@ -96,9 +116,22 @@ def fetch(url, name, is_pdf):
         print(f"REUSE STAGED {target}")
         return
     parsed = urlsplit(url)
-    encoded_url = urlunsplit((parsed.scheme, parsed.netloc, quote(parsed.path, safe="/%:@"),
-                             quote(parsed.query, safe="=&%:+,;/?"), ""))
-    request = Request(encoded_url, headers={"User-Agent": "Mozilla/5.0 (compatible; academic report collection)", "Accept": "*/*"})
+    encoded_url = urlunsplit(
+        (
+            parsed.scheme,
+            parsed.netloc,
+            quote(parsed.path, safe="/%:@"),
+            quote(parsed.query, safe="=&%:+,;/?"),
+            "",
+        )
+    )
+    request = Request(
+        encoded_url,
+        headers={
+            "User-Agent": "Mozilla/5.0 (compatible; academic report collection)",
+            "Accept": "*/*",
+        },
+    )
     partial = target.with_suffix(target.suffix + ".part")
     with urlopen(request, timeout=60) as response:
         headers = dict(response.headers)
@@ -109,10 +142,24 @@ def fetch(url, name, is_pdf):
     if is_pdf and not partial.read_bytes()[:1024].lstrip().startswith(b"%PDF-"):
         raise ValueError(f"Not a PDF: {url}; staged for rejection at {partial}")
     partial.rename(target)
-    save(WORK / (name + ".http.json"), {"requested_url": url, "final_url": final,
-         "downloaded_at": stamp(), "status": status, "headers": headers,
-         "bytes": target.stat().st_size, "sha256": sha(target)})
-    print(json.dumps({"path": str(target), "bytes": target.stat().st_size, "final_url": final}, ensure_ascii=False))
+    save(
+        WORK / (name + ".http.json"),
+        {
+            "requested_url": url,
+            "final_url": final,
+            "downloaded_at": stamp(),
+            "status": status,
+            "headers": headers,
+            "bytes": target.stat().st_size,
+            "sha256": sha(target),
+        },
+    )
+    print(
+        json.dumps(
+            {"path": str(target), "bytes": target.stat().st_size, "final_url": final},
+            ensure_ascii=False,
+        )
+    )
     if is_pdf:
         inspect(target, WORK / (name + ".inspection.json"))
 
@@ -121,8 +168,13 @@ def snapshot():
     target = RECORDS / "original_files_sha256_before.json"
     if target.exists():
         raise FileExistsError("Baseline already exists; will not overwrite")
-    files = list((ROOT / "origin" / "年度报告").glob("*.pdf")) + list((ROOT / "年度报告").glob("*.md"))
-    save(target, {"created_at": stamp(), "files": {str(p.relative_to(ROOT)): sha(p) for p in sorted(files)}})
+    files = list((ROOT / "origin" / "年度报告").glob("*.pdf")) + list(
+        (ROOT / "年度报告").glob("*.md")
+    )
+    save(
+        target,
+        {"created_at": stamp(), "files": {str(p.relative_to(ROOT)): sha(p) for p in sorted(files)}},
+    )
     print(f"Saved baseline for {len(files)} existing files")
 
 
@@ -135,10 +187,12 @@ def links(path, base, pattern):
 
         def handle_starttag(self, tag, attrs):
             attrs = dict(attrs)
-            if tag == "a": self.current = [attrs.get("href", ""), attrs.get("title", "")]
+            if tag == "a":
+                self.current = [attrs.get("href", ""), attrs.get("title", "")]
 
         def handle_data(self, data):
-            if self.current is not None: self.current[1] += " " + data.strip()
+            if self.current is not None:
+                self.current[1] += " " + data.strip()
 
         def handle_endtag(self, tag):
             if tag == "a" and self.current is not None:
@@ -149,12 +203,21 @@ def links(path, base, pattern):
     parser.feed(path.read_text(encoding="utf-8", errors="replace"))
     for href, text in parser.found:
         if re.search(pattern, href + " " + text, re.I):
-            print(json.dumps({"url": urljoin(base, href), "text": re.sub(r"\s+", " ", text).strip()}, ensure_ascii=False))
+            print(
+                json.dumps(
+                    {"url": urljoin(base, href), "text": re.sub(r"\s+", " ", text).strip()},
+                    ensure_ascii=False,
+                )
+            )
 
 
 def verify_baseline():
     value = json.loads((RECORDS / "original_files_sha256_before.json").read_text(encoding="utf-8"))
-    bad = [path for path, digest in value["files"].items() if not (ROOT / path).exists() or sha(ROOT / path) != digest]
+    bad = [
+        path
+        for path, digest in value["files"].items()
+        if not (ROOT / path).exists() or sha(ROOT / path) != digest
+    ]
     print(json.dumps({"original_files": len(value["files"]), "changed": bad}, ensure_ascii=False))
     if bad:
         raise ValueError("Original files changed")
@@ -163,46 +226,80 @@ def verify_baseline():
 def compare(local, official, output):
     local = local.resolve()
     left, right = pages(local), pages(official)
-    normalize = lambda s: re.sub(r"\s+", "", s)
+
+    def normalize(value):
+        return re.sub(r"\s+", "", value)
+
     a, b = list(map(normalize, left)), list(map(normalize, right))
-    offset = next((i for i in range(max(0, len(b)-len(a)+1)) if b[i:i+len(a)] == a), None)
+    offset = next((i for i in range(max(0, len(b) - len(a) + 1)) if b[i : i + len(a)] == a), None)
     local_label = str(local.relative_to(ROOT)) if local.is_relative_to(ROOT) else local.name
-    result = {"local": local_label, "official_staged_name": official.name,
-              "local_sha256": sha(local), "official_sha256": sha(official),
-              "local_pages": len(a), "official_pages": len(b),
-              "binary_identical": sha(local) == sha(official),
-              "all_page_texts_match": offset is not None,
-              "official_page_range": [offset+1, offset+len(a)] if offset is not None else None,
-              "method": "Remove Unicode whitespace, compare every page in order; image contents are not compared",
-              "checked_at": stamp()}
+    result = {
+        "local": local_label,
+        "official_staged_name": official.name,
+        "local_sha256": sha(local),
+        "official_sha256": sha(official),
+        "local_pages": len(a),
+        "official_pages": len(b),
+        "binary_identical": sha(local) == sha(official),
+        "all_page_texts_match": offset is not None,
+        "official_page_range": [offset + 1, offset + len(a)] if offset is not None else None,
+        "method": "Remove Unicode whitespace, compare every page in order; image contents are not compared",
+        "checked_at": stamp(),
+    }
     if offset is None:
-        result["same_numbered_page_matches"] = sum(x == y for x,y in zip(a,b))
+        result["same_numbered_page_matches"] = sum(x == y for x, y in zip(a, b, strict=False))
     save(output, result)
     print(json.dumps(result, ensure_ascii=False))
 
 
 def cninfo(code, query, date_range):
-    headers = {"User-Agent": "Mozilla/5.0", "Referer": "https://www.cninfo.com.cn/",
-               "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"}
-    request = Request("https://www.cninfo.com.cn/new/information/topSearch/query",
-                      data=urlencode({"keyWord": code, "maxNum": 10}).encode(), headers=headers)
+    headers = {
+        "User-Agent": "Mozilla/5.0",
+        "Referer": "https://www.cninfo.com.cn/",
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    }
+    request = Request(
+        "https://www.cninfo.com.cn/new/information/topSearch/query",
+        data=urlencode({"keyWord": code, "maxNum": 10}).encode(),
+        headers=headers,
+    )
     with urlopen(request, timeout=40) as response:
         identities = json.load(response)
     issuer = next(x for x in identities if x.get("code") == code)
-    values = {"pageNum": 1, "pageSize": 30, "tabName": "fulltext",
-              "column": "sse" if code.startswith("6") else "szse",
-              "stock": code + "," + issuer["orgId"], "searchkey": query,
-              "secDate": date_range, "isHLtitle": "true"}
-    request = Request("https://www.cninfo.com.cn/new/hisAnnouncement/query",
-                      data=urlencode(values).encode(), headers=headers)
+    values = {
+        "pageNum": 1,
+        "pageSize": 30,
+        "tabName": "fulltext",
+        "column": "sse" if code.startswith("6") else "szse",
+        "stock": code + "," + issuer["orgId"],
+        "searchkey": query,
+        "secDate": date_range,
+        "isHLtitle": "true",
+    }
+    request = Request(
+        "https://www.cninfo.com.cn/new/hisAnnouncement/query",
+        data=urlencode(values).encode(),
+        headers=headers,
+    )
     with urlopen(request, timeout=40) as response:
         value = json.load(response)
     WORK.mkdir(parents=True, exist_ok=True)
-    save(WORK / (code + "_" + query + ".cninfo.json"), {"query": values, "at": stamp(), "response": value})
+    save(
+        WORK / (code + "_" + query + ".cninfo.json"),
+        {"query": values, "at": stamp(), "response": value},
+    )
     for item in value.get("announcements") or []:
-        print(json.dumps({"title": re.sub("<[^>]*>", "", item["announcementTitle"]),
-                          "url": urljoin("https://static.cninfo.com.cn/", item["adjunctUrl"]),
-                          "announcement_id": item["announcementId"], "time": item["announcementTime"]}, ensure_ascii=False))
+        print(
+            json.dumps(
+                {
+                    "title": re.sub("<[^>]*>", "", item["announcementTitle"]),
+                    "url": urljoin("https://static.cninfo.com.cn/", item["adjunctUrl"]),
+                    "announcement_id": item["announcementId"],
+                    "time": item["announcementTime"],
+                },
+                ensure_ascii=False,
+            )
+        )
 
 
 def diagnose_mirrors():
@@ -210,33 +307,71 @@ def diagnose_mirrors():
     for source in sorted((ROOT / "origin" / "年度报告").glob("*.pdf")):
         mirror = ROOT / "年度报告" / (source.stem + ".md")
         original = pages(source)
-        extracted = re.findall(r"^## PDF page (\d+)\n\n```text\n(.*?)\n```$",
-                               mirror.read_text(encoding="utf-8"), re.M | re.S)
+        extracted = re.findall(
+            r"^## PDF page (\d+)\n\n```text\n(.*?)\n```$",
+            mirror.read_text(encoding="utf-8"),
+            re.M | re.S,
+        )
         if len(extracted) != len(original):
             raise ValueError(f"Existing mirror page count differs: {mirror}")
         differences = []
-        for i, ((number, old), current) in enumerate(zip(extracted, original), 1):
-            if int(number) != i: raise ValueError("Existing page sequence differs")
-            norm = lambda s: re.sub(r"\s+", " ", s).strip()
-            if norm(old) == norm(current): continue
+        for i, ((number, old), current) in enumerate(zip(extracted, original, strict=True), 1):
+            if int(number) != i:
+                raise ValueError("Existing page sequence differs")
+
+            def norm(value):
+                return re.sub(r"\s+", " ", value).strip()
+
+            if norm(old) == norm(current):
+                continue
             a, b = re.sub(r"\s+", "", old), re.sub(r"\s+", "", current)
-            kind = "whitespace_only" if a == b else "reading_order_only" if Counter(a) == Counter(b) else "character_content_difference"
-            differences.append({"pdf_page":i,"classification":kind,
-                                "character_count_old":len(a),"character_count_current":len(b)})
-        result = {"source":source.relative_to(ROOT).as_posix(),"mirror":mirror.relative_to(ROOT).as_posix(),
-                  "pages":len(original),"mismatched_pages":len(differences),"differences":differences}
+            kind = (
+                "whitespace_only"
+                if a == b
+                else "reading_order_only"
+                if Counter(a) == Counter(b)
+                else "character_content_difference"
+            )
+            differences.append(
+                {
+                    "pdf_page": i,
+                    "classification": kind,
+                    "character_count_old": len(a),
+                    "character_count_current": len(b),
+                }
+            )
+        result = {
+            "source": source.relative_to(ROOT).as_posix(),
+            "mirror": mirror.relative_to(ROOT).as_posix(),
+            "pages": len(original),
+            "mismatched_pages": len(differences),
+            "differences": differences,
+        }
         results.append(result)
-        print(json.dumps({"file":source.name,"mismatched_pages":len(differences),
-                          "classifications":dict(Counter(d["classification"] for d in differences))},ensure_ascii=False))
-    save(RECORDS / "validation" / "existing_mirror_differences.json",
-         {"method":"Same page mapping as verify_conversion.py; classify normalized text differences without changing files",
-          "warning":"Equal character multisets identify order differences, not correct paragraph/table semantics; original mirror tool version is unknown",
-          "documents":results})
+        print(
+            json.dumps(
+                {
+                    "file": source.name,
+                    "mismatched_pages": len(differences),
+                    "classifications": dict(Counter(d["classification"] for d in differences)),
+                },
+                ensure_ascii=False,
+            )
+        )
+    save(
+        RECORDS / "validation" / "existing_mirror_differences.json",
+        {
+            "method": "Same page mapping as verify_conversion.py; classify normalized text differences without changing files",
+            "warning": "Equal character multisets identify order differences, not correct paragraph/table semantics; original mirror tool version is unknown",
+            "documents": results,
+        },
+    )
 
 
 def convert(source, target):
     from convert_to_text import convert_pdf
-    from verify_conversion import check_pdf, ERRORS
+    from verify_conversion import ERRORS, check_pdf
+
     preview = WORK / "preview" / source.parent.name / (source.stem + ".md")
     if not preview.exists():
         convert_pdf(source, preview, False)
@@ -282,15 +417,24 @@ def main():
     cn.add_argument("query")
     cn.add_argument("date_range")
     args = parser.parse_args()
-    if args.command == "snapshot": snapshot()
-    elif args.command == "verify-baseline": verify_baseline()
-    elif args.command == "fetch": fetch(args.url, args.name, not args.html)
-    elif args.command == "inspect": inspect(args.path, args.output)
-    elif args.command == "convert": convert(args.source, args.target)
-    elif args.command == "links": links(args.path, args.base, args.pattern)
-    elif args.command == "compare": compare(args.local, args.official, args.output)
-    elif args.command == "cninfo": cninfo(args.code, args.query, args.date_range)
-    elif args.command == "diagnose-mirrors": diagnose_mirrors()
+    if args.command == "snapshot":
+        snapshot()
+    elif args.command == "verify-baseline":
+        verify_baseline()
+    elif args.command == "fetch":
+        fetch(args.url, args.name, not args.html)
+    elif args.command == "inspect":
+        inspect(args.path, args.output)
+    elif args.command == "convert":
+        convert(args.source, args.target)
+    elif args.command == "links":
+        links(args.path, args.base, args.pattern)
+    elif args.command == "compare":
+        compare(args.local, args.official, args.output)
+    elif args.command == "cninfo":
+        cninfo(args.code, args.query, args.date_range)
+    elif args.command == "diagnose-mirrors":
+        diagnose_mirrors()
 
 
 if __name__ == "__main__":
