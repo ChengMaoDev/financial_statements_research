@@ -1,0 +1,51 @@
+{
+  "url": "https://www.cninfo.com.cn/new/hisAnnouncement/query",
+  "method": "POST",
+  "parameters": {
+    "pageNum": 1,
+    "pageSize": 30,
+    "tabName": "fulltext",
+    "column": "szse",
+    "stock": "000651,gssz0000651",
+    "searchkey": "审阅报告",
+    "secDate": "2024-01-01~2026-10-22",
+    "isHLtitle": "false"
+  },
+  "retrieved_at": "2026-10-22T14:59:41+08:00",
+  "response": {
+    "classifiedAnnouncements": null,
+    "totalSecurities": 0,
+    "totalAnnouncement": 1,
+    "totalRecordNum": 1,
+    "announcements": [
+      {
+        "id": null,
+        "secCode": "000651",
+        "secName": "格力电器",
+        "orgId": "gssz0000651",
+        "announcementId": "1202582981",
+        "announcementTitle": "2015年1月1日至2016年6月30日止备考合并财务报表及审阅报告",
+        "announcementTime": 1471536000000,
+        "adjunctUrl": "finalpage/2016-08-19/1202582981.PDF",
+        "adjunctSize": 50249,
+        "adjunctType": "PDF",
+        "storageTime": null,
+        "columnId": "251302||09020202||250101",
+        "pageColumn": "SZZB",
+        "announcementType": "01010903||010112||0129",
+        "associateAnnouncement": null,
+        "important": null,
+        "batchNum": null,
+        "announcementContent": "",
+        "orgName": null,
+        "tileSecName": "格力电器",
+        "shortTitle": "2015年1月1日至2016年6月30日止备考合并财务报表及审阅报告",
+        "announcementTypeName": null,
+        "secNameList": null
+      }
+    ],
+    "categoryList": null,
+    "hasMore": false,
+    "totalpages": 0
+  }
+}

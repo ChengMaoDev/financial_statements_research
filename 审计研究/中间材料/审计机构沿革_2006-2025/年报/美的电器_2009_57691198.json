@@ -1,0 +1,33 @@
+{
+  "url": "https://static.cninfo.com.cn/finalpage/2010-03-16/57691198.PDF",
+  "at": "2026-10-22T17:52:59+08:00",
+  "sha256": "518ebc7600929c5a439adead8c7bd6e059a4f66dc57a1e72fd485fbe580a8d7d",
+  "item": {
+    "id": null,
+    "secCode": "000527",
+    "secName": "美的电器",
+    "orgId": "gssz0000527",
+    "announcementId": "57691198",
+    "announcementTitle": "2009年年度报告",
+    "announcementTime": 1268692260000,
+    "adjunctUrl": "finalpage/2010-03-16/57691198.PDF",
+    "adjunctSize": 826,
+    "adjunctType": "PDF",
+    "storageTime": null,
+    "columnId": "01030101||01030402||010612||010613||250101||250102||251302||251303",
+    "pageColumn": "SZZB",
+    "announcementType": "01010503||010112||01030101",
+    "associateAnnouncement": null,
+    "important": null,
+    "batchNum": null,
+    "announcementContent": "",
+    "orgName": null,
+    "tileSecName": "美的电器",
+    "shortTitle": "2009年年度报告",
+    "announcementTypeName": null,
+    "secNameList": null,
+    "name": "美的电器",
+    "year": 2009,
+    "index": "原始材料/审计机构沿革_2006-2025/检索/美的电器_年报_1.json"
+  }
+}

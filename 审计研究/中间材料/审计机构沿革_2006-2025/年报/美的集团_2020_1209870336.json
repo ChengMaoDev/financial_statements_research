@@ -1,0 +1,33 @@
+{
+  "url": "https://static.cninfo.com.cn/finalpage/2021-04-30/1209870336.PDF",
+  "at": "2026-10-22T17:53:07+08:00",
+  "sha256": "882d289f0d753c91ddf967ffb725639827f8a5be0c835ca6da33011e787bf2cc",
+  "item": {
+    "id": null,
+    "secCode": "000333",
+    "secName": "美的集团",
+    "orgId": "9900005965",
+    "announcementId": "1209870336",
+    "announcementTitle": "2020年年度报告",
+    "announcementTime": 1619712000000,
+    "adjunctUrl": "finalpage/2021-04-30/1209870336.PDF",
+    "adjunctSize": 5163,
+    "adjunctType": "PDF",
+    "storageTime": null,
+    "columnId": "09020202||250101||250102||251302",
+    "pageColumn": "SZZB",
+    "announcementType": "01010503||010112||01030101",
+    "associateAnnouncement": null,
+    "important": null,
+    "batchNum": null,
+    "announcementContent": "",
+    "orgName": null,
+    "tileSecName": "美的集团",
+    "shortTitle": "2020年年度报告",
+    "announcementTypeName": null,
+    "secNameList": null,
+    "name": "美的集团",
+    "year": 2020,
+    "index": "原始材料/审计机构沿革_2006-2025/检索/美的集团_年报_1.json"
+  }
+}

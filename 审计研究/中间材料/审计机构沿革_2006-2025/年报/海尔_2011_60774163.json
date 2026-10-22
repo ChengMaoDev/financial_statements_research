@@ -1,0 +1,33 @@
+{
+  "url": "https://static.cninfo.com.cn/finalpage/2012-03-31/60774163.PDF",
+  "at": "2026-10-22T17:52:50+08:00",
+  "sha256": "6e9faefcb2c919ae54c5d2fab94742f5371340b1ee920d6b13bd484c3bfd780d",
+  "item": {
+    "id": null,
+    "secCode": "600690",
+    "secName": "青岛海尔",
+    "orgId": "gssh0600690",
+    "announcementId": "60774163",
+    "announcementTitle": "2011年年度报告",
+    "announcementTime": 1333146600000,
+    "adjunctUrl": "finalpage/2012-03-31/60774163.PDF",
+    "adjunctSize": 1237,
+    "adjunctType": "PDF",
+    "storageTime": null,
+    "columnId": "250401||250402||251302||251303",
+    "pageColumn": "SHZB",
+    "announcementType": "01010501||010113||01030101",
+    "associateAnnouncement": null,
+    "important": null,
+    "batchNum": null,
+    "announcementContent": "",
+    "orgName": null,
+    "tileSecName": "青岛海尔",
+    "shortTitle": "2011年年度报告",
+    "announcementTypeName": null,
+    "secNameList": null,
+    "name": "海尔",
+    "year": 2011,
+    "index": "原始材料/审计机构沿革_2006-2025/检索/海尔_年报_2.json"
+  }
+}

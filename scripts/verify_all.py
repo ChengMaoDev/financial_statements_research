@@ -3011,6 +3011,43 @@ def check_financial_assets() -> tuple[int, int]:
     return passed, failed
 
 
+def check_audit_report_catalog() -> tuple[int, int]:
+    """核对新增审计/审阅对应关系、原件哈希、期间、页段和跨市场去重。"""
+    from collect_audit_reports import validate
+
+    print("【59】审计报告收集：财报对应关系及文件完整性")
+    errors = validate()
+    for error in errors:
+        print(f"    差异：{error}")
+    print(f"    23 份财报、37 个报告版本；差异 {len(errors)}\n")
+    return (0, len(errors)) if errors else (1, 0)
+
+
+def check_audit_firm_summary() -> tuple[int, int]:
+    """核对汇总新增的事务所评价表、证据链接及归档完整性。"""
+    from build_audit_summary import validate_summary
+
+    print("【60】事务所水平评价：正文同步、来源链接及证据哈希")
+    errors = validate_summary()
+    for error in errors:
+        print(f"    差异：{error}")
+    print(f"    差异 {len(errors)}\n")
+    return (0, len(errors)) if errors else (1, 0)
+
+
+def check_auditor_history() -> tuple[int, int]:
+    """核对二十年审计机构的逐年覆盖、原件页段与易错变更边界。"""
+    from build_auditor_history import validate
+    from reorganize_audit_files import verify
+
+    print("【61】近20年审计机构：60个年度记录与变更边界")
+    errors = validate() + verify()
+    for error in errors:
+        print(f"    差异：{error}")
+    print(f"    差异 {len(errors)}\n")
+    return (0, len(errors)) if errors else (1, 0)
+
+
 def main() -> int:
     print(f"校验目录 {ROOT}\n")
     total_pass = total_fail = 0
@@ -3072,6 +3109,9 @@ def main() -> int:
         check_real_estate,
         check_data_nature,
         check_cross_keyword_dedup,
+        check_audit_report_catalog,
+        check_audit_firm_summary,
+        check_auditor_history,
     ):
         passed, failed = check()
         total_pass += passed
