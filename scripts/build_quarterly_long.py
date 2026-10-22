@@ -158,9 +158,17 @@ def main() -> int:
                             f" 相减 {v:.2f} 差 {v - d:+.2f} 亿（疑似追溯重述）"
                         )
 
+                restated = (company, year, qn) in {
+                    ("美的集团", "2023", "Q4"),
+                    ("格力电器", "2023", "Q4"),
+                    ("海尔智家", "2023", "Q4"),
+                    ("海尔智家", "2024", "Q4"),
+                }
+                if restated:
+                    notes.append("已删除混合披露版本的累计相减数；仅保留年报分季披露")
                 margin = (
-                    f"{(revenue - cost) / revenue * 100:.2f}"
-                    if revenue and cost is not None and revenue
+                    f"{(rev_derived - cost) / rev_derived * 100:.2f}"
+                    if rev_derived and cost is not None and not restated
                     else ""
                 )
                 net = (
@@ -174,12 +182,12 @@ def main() -> int:
                         year,
                         qn,
                         period,
-                        num(gross),
+                        "" if restated else num(gross),
                         num(revenue),
-                        num(cost),
+                        "" if restated else num(cost),
                         num(profit),
-                        num(rev_derived) if rev_disc is not None else "",
-                        num(profit_derived) if profit_disc is not None else "",
+                        num(rev_derived) if rev_disc is not None and not restated else "",
+                        num(profit_derived) if profit_disc is not None and not restated else "",
                         margin,
                         net,
                         ";".join(notes),
@@ -245,7 +253,7 @@ def reconcile(
             has_disclosed = any(r[0] == company and r[1] == year and "披露" in r[12] for r in rows)
             reason = (
                 "——分季表为当年披露口径、akshare 年度数为最新年报重述口径，"
-                "差异是重述增量而非经营（见数据源分级.md 陷阱 9/20/65）"
+                "差异须按披露版本区分（见数据源分级.md）"
                 if has_disclosed
                 else ""
             )

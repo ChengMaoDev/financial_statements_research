@@ -20,6 +20,8 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+from normalize_snapshots import usable_report
+
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "财务数据"
 
@@ -68,6 +70,8 @@ def fetch_statements(ak) -> None:
                 continue
             for _, record in df.iterrows():
                 period = clean(record["报告日"])
+                if not usable_report(name, period):
+                    continue
                 for field, value in record.items():
                     if field == "报告日":
                         continue

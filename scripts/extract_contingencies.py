@@ -64,11 +64,12 @@ import re
 import sys
 from pathlib import Path
 
+from pdf_util import pdf_text
+
 ROOT = Path(__file__).resolve().parent.parent
 PDF_DIR = ROOT / "年度报告"
 FIN = ROOT / "财务数据"
 OUT = FIN / "或有事项与期后承诺.csv"
-CACHE = Path("/tmp/fsr")
 
 # (公司, 年度, 类别, 项目, 金额亿元, 数据性质, 来源)
 ROWS: list[tuple[str, str, str, str, str, str, str]] = [
@@ -467,20 +468,7 @@ def flatten(text: str) -> str:
 
 
 def report_text(name: str) -> str:
-    stem = name.replace(".pdf", "")
-    cached = CACHE / f"{stem}.txt"
-    if cached.exists():
-        return cached.read_text(encoding="utf-8", errors="ignore")
-    import subprocess
-
-    result = subprocess.run(
-        ["pdftotext", "-layout", str(PDF_DIR / name), "-"],
-        capture_output=True,
-        text=True,
-        timeout=300,
-        check=False,
-    )
-    return result.stdout
+    return pdf_text(PDF_DIR / name)
 
 
 def main() -> int:

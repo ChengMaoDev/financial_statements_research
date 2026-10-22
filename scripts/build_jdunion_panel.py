@@ -2,32 +2,32 @@
 
 ## 数据来源
 
-`union.jd.com/proManager` 商品推广页（登录态）。按「30天引入订单量」降序，
-每个关键词取前 2 页 × 60 条。原始导出保留在 `市场数据/电商/jdunion-<kw>.csv`。
+`union.jd.com/proManager` 商品推广页（登录态）。原始导出保留在
+`市场数据/电商/jdunion-<kw>.csv`。2026-10-21旧样本曾尝试排序，但结果未降序；
+2026-10-22补采热泵干衣机一页60条。两批均为检索样本，不代表最高引单商品。
 
-## 关键发现：这不是 SKU 级数据
+## 共享数值的处理
 
 同一个店铺下，一批 SKU 会共享**完全相同**的 `inOrderCount30Days` 与
 `inOrderComm30Days`（后者精确到分，19 个不同型号的电视共用 6,362,047.64）。
-这在统计上不可能是巧合，说明京东联盟返回的是**店铺 × 商品系列（投放单元）**
-层级的聚合值，页面只是把它重复挂在组内每个 SKU 上。
+平台未披露其聚合层级，不能直接认定为SKU真实订单数或商品系列总量。
 
 因此在 SKU 级求和会成倍放大。本脚本按
-`(品类, 店铺, 引单量_30天, 支出佣金_30天)` 折叠成**组级观测**，
+`(采集日期, 品类, 店铺, 引单量_30天, 支出佣金_30天)` 折叠成**组级观测**，
 SKU 明细保留在 `京东联盟_SKU明细.csv` 供核对。
 
 ## 字段口径
 
-- `引单量_30天`：近 30 天引流订单量，**只有 1 位有效数字**（100/200/…/900/1000/2000/…/40000）。
-  平台做的是数量级归档，不是计数。跨组比较只能看量级，不能算「是另一组的 1.83 倍」。
+- `引单量_30天`：近30天引单展示数；不少值只有1位有效数字，部分小值是否精确未经确认。
+  仅保留展示量级，不据此计算真实销量、倍数或跨组总量。
 - `支出佣金_30天`：近 30 天佣金支出（元），未取整。缺陷是随佣金率浮动，
   佣金率 1% 和 10% 的同销量商品会差 10 倍，**不能当销售额或销量代理**。
 - `代表到手价_元`：组内 SKU 的到手价中位数。
-- `SKU数`：该组在本关键词结果里出现的 SKU 个数，反映系列的铺货宽度。
+- `SKU数`：组内去重后的SKU个数；保留全部来源关键词，不等于系列铺货总数。
 
 ## 能回答 / 不能回答
 
-能：同一时点、同一平台、同一检索口径下，各店铺/系列的量级梯队与铺货宽度。
+能：描述同一采集日的检索结果、展示价格和引单量级。
 
 不能：品牌实际销量、销售额、市场份额；不能把引单量求和当品类销量
 （引单量≠成交件数，且只覆盖开通联盟佣金的商品）。
@@ -38,12 +38,17 @@ SKU 明细保留在 `京东联盟_SKU明细.csv` 供核对。
 
 from __future__ import annotations
 
+import argparse
 import csv
+import hashlib
+import json
 import re
 import statistics
 import sys
 from datetime import datetime
 from pathlib import Path
+
+from ecommerce_fields import FIELDS, enrich
 
 ROOT = Path(__file__).resolve().parent.parent
 RAW_DIR = ROOT / "市场数据" / "电商"
@@ -68,6 +73,7 @@ KEYWORDS = {
     "dishwasher": ("洗碗机", "洗碗机"),
     "dryer": ("干衣机", "干衣机"),
     "integratedstove": ("集成灶", "集成灶"),
+    "dryer_heatpump": ("热泵干衣机", "干衣机"),
 }
 
 BRAND_ALIASES = [
@@ -196,6 +202,7 @@ def load_raw() -> list[dict[str, str]]:
                 row["kw_file"] = key
                 row["keyword"] = keyword
                 row["category"] = category
+                row["source_file"] = path.relative_to(ROOT).as_posix()
                 rows.append(row)
     return rows
 
@@ -253,6 +260,9 @@ def main() -> int:
                 "comments": to_int(row.get("comments", "")),
                 "good": row.get("good", ""),
                 "comm_rate": row.get("commShare", ""),
+                "source_file": row["source_file"],
+                "collected": row.get("collected_at", "2026-10-21"),
+                "coupon": row.get("coupon", ""),
             }
         )
 
@@ -265,7 +275,7 @@ def main() -> int:
     # 与华帝 SKU 数 3:3 平票、按插入顺序选中美的，6 条华帝机型被计入美的。
     #
     # 因此 o30=0 且 c30=0 时不折叠，用 SKU 自身作键（一个 SKU 一个组）。
-    groups: dict[tuple[str, str, int, float | None, str], list[dict[str, object]]] = {}
+    groups: dict[tuple[str, str, int, float | None, str, str], list[dict[str, object]]] = {}
     for row in sku_rows:
         o30 = int(row["o30"])
         c30 = row["c30"]
@@ -276,11 +286,15 @@ def main() -> int:
             o30,
             c30,
             str(row["sku"]) if degenerate else "",
+            str(row["collected"])[:10],
         )
         groups.setdefault(key, []).append(row)
 
     group_rows: list[list[str]] = []
-    for (category, shop, o30, c30, _sku_key), members in groups.items():
+    for (category, shop, o30, c30, sku_key, snapshot), observations in groups.items():
+        # SKU 明细保留检索词观测；组内价格与型号数按唯一 SKU 计算。
+        unique = {str(member["sku"]): member for member in observations}
+        members = list(unique.values())
         prices = [float(m["price"]) for m in members if m["price"]]
         brand_counts: dict[str, int] = {}
         for m in members:
@@ -295,9 +309,13 @@ def main() -> int:
                 "" if c30 is None else f"{c30:.2f}",
                 f"{statistics.median(prices):.2f}" if prices else "",
                 str(len(members)),
-                members[0]["keyword"],
+                ";".join(sorted({str(member["keyword"]) for member in observations})),
                 str(min(float(m["price"]) for m in members if m["price"])) if prices else "",
                 str(max(float(m["price"]) for m in members if m["price"])) if prices else "",
+                hashlib.sha256(
+                    repr((category, shop, o30, c30, sku_key, snapshot)).encode("utf-8")
+                ).hexdigest()[:20],
+                snapshot,
             ]
         )
 
@@ -323,6 +341,8 @@ def main() -> int:
             "来源关键词",
             "最低到手价_元",
             "最高到手价_元",
+            "组标识",
+            "采集日期",
         ],
         group_rows,
     )
@@ -343,6 +363,10 @@ def main() -> int:
             str(r["comments"]),
             str(r["good"]),
             str(r["comm_rate"]),
+            str(r["source_file"]),
+            str(r["collected"]),
+            str(r["coupon"]),
+            *enrich("jd", str(r["sku"]), str(r["name"])),
         ]
         for r in sku_rows
     ]
@@ -363,6 +387,10 @@ def main() -> int:
             "评价数",
             "好评率",
             "佣金率",
+            "来源文件",
+            "采集时间",
+            "优惠券标记_原始",
+            *FIELDS,
         ],
         sku_export,
     )
@@ -381,5 +409,48 @@ def main() -> int:
     return 0
 
 
+def import_snapshot(path: Path) -> None:
+    """只导入浏览器白名单字段；输入不得覆盖已有关键词快照。"""
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if payload["keyword"] != "dryer_heatpump":
+        raise ValueError("仅接受本次热泵干衣机补采")
+    target = RAW_DIR / "jdunion-dryer_heatpump.csv"
+    if target.exists():
+        raise FileExistsError(f"快照已存在，拒绝覆盖：{target.name}")
+    columns = [
+        "sku",
+        "name",
+        "brand",
+        "shop",
+        "price",
+        "o30",
+        "c30",
+        "comments",
+        "good",
+        "commShare",
+        "coupon",
+        "dtype",
+    ]
+    with target.open("w", encoding="utf-8-sig", newline="") as stream:
+        writer = csv.writer(stream, lineterminator="\n")
+        writer.writerow(["kw", "page", *columns, "collected_at", "source_url"])
+        for row in payload["rows"]:
+            writer.writerow(
+                [
+                    "dryer_heatpump",
+                    "1",
+                    *(row[column] for column in columns),
+                    payload["collected_at"],
+                    payload["source_url"],
+                ]
+            )
+    print(f"补采原始导出 {target.name}：{len(payload['rows'])} 行")
+
+
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--import-json", type=Path, help="导入本次浏览器补采的热泵干衣机样本")
+    args = parser.parse_args()
+    if args.import_json:
+        import_snapshot(args.import_json)
     sys.exit(main())

@@ -82,14 +82,14 @@ from __future__ import annotations
 import argparse
 import csv
 import re
-import subprocess
 import sys
 from pathlib import Path
+
+from pdf_util import pdf_text
 
 ROOT = Path(__file__).resolve().parent.parent
 PDF_DIR = ROOT / "年度报告"
 FIN = ROOT / "财务数据"
-CACHE = Path("/tmp/fsr")
 OUT = FIN / "租赁与承诺事项.csv"
 
 COMPANIES = ("美的集团", "海尔智家", "格力电器")
@@ -172,17 +172,9 @@ BUCKET = {
 
 
 def lines_of(company: str, year: int) -> list[str]:
-    """优先读 /tmp/fsr 的 pdftotext -layout 缓存，缺了才转 PDF。"""
+    """从原始 PDF 读取，避免旧文本缓存掩盖提取问题。"""
     pdf = PDF_DIR / PDF[company][year]
-    cached = CACHE / f"{pdf.stem}.txt"
-    if cached.exists():
-        return cached.read_text(encoding="utf-8").splitlines()
-    if not pdf.exists():
-        raise FileNotFoundError(f"缺少 {pdf}，且 /tmp/fsr/{pdf.stem}.txt 缓存不存在")
-    result = subprocess.run(
-        ["pdftotext", "-layout", str(pdf), "-"], capture_output=True, text=True, check=False
-    )
-    return result.stdout.splitlines()
+    return pdf_text(pdf).splitlines()
 
 
 def flat(lines: list[str]) -> str:

@@ -41,6 +41,7 @@ def clean(value: object) -> str:
 
 
 def write_frame(path: Path, company: str, code: str, df, columns: list[str]) -> int:
+    columns = [column for column in columns if column not in ("公司", "股票代码")]
     exists = path.exists()
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a" if exists else "w", encoding="utf-8-sig", newline="") as stream:
@@ -101,27 +102,29 @@ def fetch_valuation(ak) -> None:
 
 
 def fetch_price(ak) -> None:
-    """日线行情（后复权），近五年。"""
-    path = OUT / "日线行情.csv"
-    path.unlink(missing_ok=True)
-    total = 0
-    for code, (_, name) in COMPANIES.items():
-        try:
-            df = ak.stock_zh_a_hist(
-                symbol=code,
-                period="daily",
-                start_date="20210101",
-                end_date="20261231",
-                adjust="hfq",
-            )
-        except Exception as exc:
-            print(f"  {name} 行情失败: {exc}", file=sys.stderr)
-            continue
-        if df is None or df.empty:
-            continue
-        total += write_frame(path, name, code, df, list(df.columns))
-        print(f"  {name}: {len(df)} 个交易日")
-    print(f"  日线行情合计 {total} 行")
+    """同时保存后复权与不复权行情，股息率只能使用不复权价格。"""
+    for filename, adjustment in (("日线行情.csv", "hfq"), ("日线行情_不复权.csv", "")):
+        path = OUT / filename
+        path.unlink(missing_ok=True)
+        total = 0
+        for code, (_, name) in COMPANIES.items():
+            try:
+                df = ak.stock_zh_a_hist(
+                    symbol=code,
+                    period="daily",
+                    start_date="20210101",
+                    end_date=f"{datetime.now():%Y%m%d}",
+                    adjust=adjustment,
+                )
+            except Exception as exc:
+                raise RuntimeError(f"{name} {filename} 行情采集失败") from exc
+            if df is None or df.empty:
+                raise ValueError(f"{name} {filename} 返回空数据")
+            columns = list(df.columns)
+            if not adjustment:
+                columns = ["日期", "开盘", "收盘", "最高", "最低", "成交量", "成交额"]
+            total += write_frame(path, name, code, df, columns)
+        print(f"  {filename}: {total} 行")
 
 
 def main() -> int:

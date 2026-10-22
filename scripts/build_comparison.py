@@ -114,7 +114,7 @@ def main() -> int:
     # 注意：主要财务指标.csv 的「营业成本」实为「营业总成本」（含税金、销售、
     # 管理、研发、财务费用），与利润表的「营业成本」不是一回事，这里必须用利润表。
     income_cost: dict[str, float] = {}
-    # 「营业收入」与「营业总收入」是两个口径：后者含其他业务收入。
+    # 「营业总收入」还含金融业务利息等；其他业务收入本已在「营业收入」中。
     # 三家对比_2026H1.csv 用的是「营业收入」，本表若只给「营业总收入」，
     # 两份对比文件无法直接对齐（美的差 20.50 亿、格力差 6.71 亿）。两个都入表。
     income_revenue: dict[str, float] = {}
@@ -214,20 +214,16 @@ def main() -> int:
         line.append(f"{cap / profit:.2f}" if cap and profit else "")
     rows.append(line)
 
-    # PB 必须用**归母**净资产：与同表「每股净资产」（也是归母口径）保持一致。
-    # 用「股东权益合计」（含少数股东）会让 PB 偏低，且 PB 与每股净资产互相矛盾。
-    # 美的少数股东 132.03 亿，差异 2.71 → 2.87。
+    # EPS 的分母是加权平均股数，不能拿它反推期末股数或期末净资产。
+    parent_equities: dict[str, float] = {}
+    with (DATA / "资产负债表.csv").open(encoding="utf-8-sig") as stream:
+        for row in csv.DictReader(stream):
+            if row["报告期"] == PERIOD and row["科目"] == "归属于母公司股东权益合计":
+                parent_equities[row["公司"]] = float(row["数值"])
     line = ["PB(市值/归母净资产)", "倍"]
     for company in COMPANIES:
         cap = caps.get(company)
-        book = metrics.get((company, "每股净资产"))
-        shares = metrics.get((company, "基本每股收益"))
-        # 归母净资产 = 总股本 × 每股净资产；总股本用「归母净利润 / 基本每股收益」反推
-        profit = metrics.get((company, "归母净利润"))
-        parent_equity = None
-        if book is not None and shares and profit:
-            share_count = profit / shares
-            parent_equity = book * share_count
+        parent_equity = parent_equities.get(company)
         line.append(f"{cap / parent_equity:.2f}" if cap and parent_equity else "")
     rows.append(line)
 
@@ -266,7 +262,7 @@ def main() -> int:
     line = ["研发强度(研发投入/营收)", "%"]
     for company in COMPANIES:
         value = research.get(company)
-        revenue = metrics.get((company, "营业总收入"))
+        revenue = income_revenue.get(company)
         line.append(f"{value / revenue * 100:.2f}" if value and revenue else "")
     rows.append(line)
 
@@ -288,7 +284,7 @@ def main() -> int:
 
     line = ["人均营收", "万元"]
     for company in COMPANIES:
-        revenue = metrics.get((company, "营业总收入"))
+        revenue = income_revenue.get(company)
         count = employees.get(company)
         line.append(f"{revenue / count / 1e4:.2f}" if revenue and count else "")
     rows.append(line)

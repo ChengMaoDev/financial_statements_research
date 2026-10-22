@@ -23,6 +23,8 @@ import csv
 import re
 from pathlib import Path
 
+from ecommerce_fields import FIELDS, enrich
+
 ROOT = Path(__file__).resolve().parent.parent
 OUT_DIR = ROOT / "市场数据" / "电商"
 INBOX = Path(__file__).resolve().parent / "_pdd_inbox"
@@ -31,8 +33,8 @@ TIP_RE = re.compile(r"(本店已拼|品牌热销|已拼|已抢|总售|热卖)\s*
 SCOPE = {
     "已拼": "商品",
     "已抢": "商品",
-    "总售": "商品",
-    "热卖": "商品",
+    "总售": "未确认",
+    "热卖": "未确认",
     "本店已拼": "店铺",
     "品牌热销": "品牌",
 }
@@ -48,6 +50,12 @@ HEADER = [
     "价格_元",
     "店铺ID",
     "是否广告",
+    "展示主语",
+    "数值性质",
+    "价格口径",
+    "来源文件",
+    "采集时间",
+    *FIELDS,
 ]
 
 
@@ -87,6 +95,16 @@ def convert(stem: str, keyword: str) -> int:
                     price_info,
                     mall_id,
                     is_ad,
+                    match.group(1) if (match := TIP_RE.search(tip)) else "",
+                    "区间下界"
+                    if lower is not None and is_range
+                    else "展示整数"
+                    if lower is not None
+                    else "非销量/未知",
+                    "搜索页展示，规格/优惠未核实",
+                    src.relative_to(ROOT).as_posix(),
+                    "2026-10-21",
+                    *enrich("pdd", goods_id, name),
                 ]
             )
     dst.parent.mkdir(parents=True, exist_ok=True)

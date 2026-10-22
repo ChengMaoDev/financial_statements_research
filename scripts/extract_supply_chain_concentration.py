@@ -1,11 +1,7 @@
 """提取前五大客户/供应商集中度与关联方购销依赖度（2019—2025）。
 
-为什么重要：
-前五大客户集中度反映议价权与应收风险，前五大供应商集中度反映关键零部件
-依赖与成本传导能力；关联方购销占比则决定「利润有多少来自内部定价」。三者
-必须一起看：格力供应商集中度 32.75% 是美的的 5.4 倍，但其「前五大供应商中
-关联方占比」披露为 0%，说明体系内配套厂未被认定为关联方——只报集中度会
-误判供应链风险。
+前五大集中度与全部关联采购/销售分别提取，不能用其中一项推断全部供应链
+关系或内部定价贡献。匿名客户保留序号，不仅凭金额相同推断身份。
 
 实际踩到的陷阱：
 1. 单位不同：美的「千元」、海尔「万元」、格力「元」。同一张表里 60,136,990
@@ -32,7 +28,7 @@
 7. 格力 2021 年报自相矛盾：前五名客户关联方占比披露 0.00%，但第 2 名
    61.74 亿与关联方「浙江盛世欣兴」销售明细分毫不差。
 8. 2019—2022 年报不在 年度报告/ 目录，需从 cninfo 按 定期报告清单.csv 的
-   链接补下；本脚本优先读 /tmp/fsr/*.txt 缓存，缺失才转 PDF。
+   链接补下；只读取原始 PDF，不接受无来源的旧文本缓存。
 
 用法：
     uv run python3 scripts/extract_supply_chain_concentration.py --all
@@ -43,16 +39,16 @@ from __future__ import annotations
 import argparse
 import csv
 import re
-import subprocess
 import sys
 import urllib.request
 from pathlib import Path
 
+from pdf_util import pdf_text
+
 ROOT = Path(__file__).resolve().parent.parent
 PDF_DIR = ROOT / "年度报告"
 FIN = ROOT / "财务数据"
-CACHE_DIR = Path("/tmp/fsr")
-HIST_PDF_DIR = CACHE_DIR / "pdf_hist"
+HIST_PDF_DIR = Path("/tmp/fsr/pdf_hist")
 OUT = FIN / "供应商客户集中度时序.csv"
 
 COMPANIES = ("美的集团", "海尔智家", "格力电器")
@@ -89,10 +85,7 @@ def num(text: str | None) -> float | None:
 
 
 def text_of(short: str, year: int) -> str | None:
-    """文本缓存优先，其次仓库内 PDF，最后补下历史 PDF。"""
-    cache = CACHE_DIR / f"{short}{year}.txt"
-    if cache.exists():
-        return cache.read_text(encoding="utf-8", errors="ignore")
+    """仓库内 PDF 优先，其次历史 PDF；缺失时按已登记链接补下。"""
     pdf = PDF_DIR / f"{short}{year}.pdf"
     if not pdf.exists():
         pdf = HIST_PDF_DIR / f"{short}{year}.pdf"
@@ -106,14 +99,7 @@ def text_of(short: str, year: int) -> str | None:
         except OSError as exc:
             print(f"  {short}{year} 下载失败: {exc}", file=sys.stderr)
             return None
-    result = subprocess.run(
-        ["pdftotext", "-layout", str(pdf), "-"],
-        capture_output=True,
-        text=True,
-        timeout=300,
-        check=False,
-    )
-    return result.stdout
+    return pdf_text(pdf)
 
 
 def flatten(text: str) -> str:
@@ -308,21 +294,6 @@ def related_gree(text: str, kind: str) -> float | None:
     return num(match.group(1)) if match else None
 
 
-def gree_related_customers(text: str) -> dict[float, str]:
-    """格力「前 5 大客户」只给序号，但关联方销售明细给了名称与金额。
-
-    用金额精确相等反查哪个名次是关联方（2019 年报还直接点名，可交叉验证）。
-    """
-    body = block(text, r"2\)\s*出售商品/提供劳务情况表", r"（2）关联受托管理")
-    names: dict[float, str] = {}
-    for line in body.splitlines():
-        values = re.findall(r"[\d,]+\.\d{2}", line)
-        if values and "销售商品" in line:
-            name = line.split("销售商品")[0].strip()
-            names[round(float(values[0].replace(",", "")), 2)] = name
-    return names
-
-
 def load_denominators() -> dict[tuple[str, int], tuple[float, float]]:
     out: dict[tuple[str, int], tuple[float, float]] = {}
     with (FIN / "利润表.csv").open(encoding="utf-8-sig") as stream:
@@ -432,7 +403,22 @@ def build_rows(denom: dict[tuple[str, int], tuple[float, float]]) -> list[dict[s
                 )
 
                 disclosed_amount = data.get(f"{prefix}_related_amount")
-                if related_ratio is None:
+                inconsistent = company == "格力电器" and year == 2021 and prefix == "cust"
+                if inconsistent:
+                    rows.append(
+                        row(
+                            company,
+                            year,
+                            category,
+                            "其中:关联方",
+                            None,
+                            None,
+                            "不可得",
+                            "原文占比与关联方明细冲突，已删除该占比及反推金额",
+                            source,
+                        )
+                    )
+                elif related_ratio is None:
                     rows.append(
                         row(
                             company, year, category, "其中:关联方", None, None, "未披露", "", source
@@ -453,23 +439,16 @@ def build_rows(denom: dict[tuple[str, int], tuple[float, float]]) -> list[dict[s
                         )
                     )
                 else:
-                    related_b = amount_b * related_ratio / 100
+                    # 关联方占比和前五名占比的分母均为年度销售/采购总额。
+                    # 不能把「占年度总额比例」乘以前五名金额。
+                    if ratio is None or ratio <= 0:
+                        raise ValueError(f"{company} {year} {category} 缺少有效的前五名占比")
+                    related_b = amount_b * related_ratio / ratio
                     related_note = (
-                        "占比为年报直接披露；金额=占比×前五名合计反推（年报未单列关联方金额）"
+                        "占比为年报直接披露；金额=前五名合计×关联方占年度总额比例÷前五名占比"
                         if related_ratio
                         else "年报明确披露关联方占比为 0，金额相应为 0"
                     )
-                    if (
-                        company == "格力电器"
-                        and year == 2021
-                        and prefix == "cust"
-                        and related_ratio == 0
-                    ):
-                        related_note = (
-                            "年报披露 0.00%，但前五名客户第 2 名金额 61.74 亿与关联方"
-                            "「浙江盛世欣兴格力贸易有限公司」销售明细完全相等——原文自相矛盾，"
-                            "疑为填报错误，引用时以明细为准"
-                        )
                     rows.append(
                         row(
                             company,
@@ -501,14 +480,6 @@ def build_rows(denom: dict[tuple[str, int], tuple[float, float]]) -> list[dict[s
                     )
                 for index, value, share in detail:
                     note = "年报以「第一名」等匿名序号列示，未披露名称"
-                    if company == "格力电器" and prefix == "cust":
-                        names = gree_related_customers(text)
-                        matched = names.get(round(value, 2))
-                        if matched:
-                            note = (
-                                f"金额与关联方明细精确相等，识别为关联方「{matched}」；"
-                                "年报仍以序号列示，名称由金额匹配得出"
-                            )
                     rows.append(
                         row(
                             company,
@@ -576,7 +547,7 @@ def build_rows(denom: dict[tuple[str, int], tuple[float, float]]) -> list[dict[s
                 note = rel_note
                 if company == "海尔智家" and category == "关联采购":
                     note = (
-                        "附注表列采购方向（销售另表 35.72 亿）；含物流、安装等服务，"
+                        "附注表列采购方向（销售另表）；含物流、安装等服务，"
                         "非纯原材料采购，与服务型关联方合并列示"
                     )
                     if year == 2025:
@@ -648,7 +619,7 @@ def self_check(
             file=sys.stderr,
         )
 
-    print("\n[校验2] 关联采购 ≤ 前五大供应商合计", file=sys.stderr)
+    print("\n[校验2] 前五名内部关联方金额不得超过前五名合计", file=sys.stderr)
     for company in COMPANIES:
         for year in YEARS:
 
@@ -671,21 +642,12 @@ def self_check(
                     None,
                 )
 
-            purchase = amount_of("关联采购", "金额")
+            purchase = amount_of("前五大供应商", "其中:关联方")
             top5 = amount_of("前五大供应商", "前五名合计")
             if purchase is None or top5 is None:
                 continue
             if purchase <= top5:
                 print(f"  {company} {year}: {purchase:,.1f} ≤ {top5:,.1f} OK", file=sys.stderr)
-            elif company == "海尔智家":
-                print(
-                    f"  {company} {year}: {purchase:,.1f} > {top5:,.1f} 违反——"
-                    "关联采购含 Mabe、HNR 等海外关联方与日日顺物流，这些不在「前五大供应商」"
-                    "同一控制合并口径内；且前五大供应商按「采购总额」为分母，与营业成本口径不同，"
-                    "两者不可直接比较",
-                    file=sys.stderr,
-                )
-                explained += 1
             else:
                 problems += 1
                 print(
@@ -769,8 +731,7 @@ def main() -> int:
             f"{value('关联销售', '占营业收入', '占比%'):>8.2f}"
         )
 
-    self_check(rows, denom)
-    return 0
+    return int(self_check(rows, denom) > 0)
 
 
 if __name__ == "__main__":

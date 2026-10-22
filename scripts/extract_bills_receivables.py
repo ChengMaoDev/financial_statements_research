@@ -68,14 +68,14 @@ from __future__ import annotations
 import argparse
 import csv
 import re
-import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+from pdf_util import pdf_text
+
 ROOT = Path(__file__).resolve().parent.parent
 PDF_DIR = ROOT / "年度报告"
-CACHE = Path("/tmp/fsr")
 FIN = ROOT / "财务数据"
 OUT = FIN / "票据与应收结构.csv"
 
@@ -170,21 +170,8 @@ def squash(text: str) -> str:
 
 
 def load_text(short: str, year: str) -> list[str]:
-    """优先读 /tmp/fsr 的 pdftotext 缓存，没有才转 PDF。"""
-    cached = CACHE / f"{short}{year}.txt"
-    if cached.exists():
-        return cached.read_text(encoding="utf-8").split("\n")
     pdf = PDF_DIR / f"{short}{year}.pdf"
-    result = subprocess.run(
-        ["pdftotext", "-layout", str(pdf), "-"],
-        capture_output=True,
-        text=True,
-        timeout=300,
-        check=False,
-    )
-    if result.returncode != 0:
-        raise RuntimeError(f"pdftotext 失败（{pdf}）：{result.stderr.strip()[:200]}")
-    return result.stdout.split("\n")
+    return pdf_text(pdf).split("\n")
 
 
 def number(token: str) -> float:

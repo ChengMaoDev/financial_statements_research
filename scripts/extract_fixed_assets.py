@@ -91,15 +91,15 @@ from __future__ import annotations
 import argparse
 import csv
 import re
-import subprocess
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from pdf_util import pdf_text
+
 ROOT = Path(__file__).resolve().parent.parent
 PDF_DIR = ROOT / "年度报告"
 FIN = ROOT / "财务数据"
-CACHE = Path("/tmp/fsr")
 OUT = FIN / "固定资产与在建工程.csv"
 
 # 固定资产按类别表的列布局。海尔跨页重排成「办公设备/其他/合计」，所以分两段。
@@ -342,18 +342,7 @@ FULL = (
 
 
 def text_of(pdf: Path) -> str:
-    """优先用 /tmp/fsr 的 pdftotext -layout 缓存，缺了才重新转 PDF。"""
-    cached = CACHE / f"{pdf.stem}.txt"
-    if cached.exists():
-        return cached.read_text(encoding="utf-8")
-    result = subprocess.run(
-        ["pdftotext", "-layout", str(pdf), "-"],
-        capture_output=True,
-        text=True,
-        timeout=300,
-        check=False,
-    )
-    return result.stdout
+    return pdf_text(pdf)
 
 
 def number(token: str) -> float:
