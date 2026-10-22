@@ -24,7 +24,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from normalize_snapshots import usable_report
+from research_scope import usable_report
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "财务数据"

@@ -17,6 +17,8 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
+from research_scope import in_scope
+
 ROOT = Path(__file__).resolve().parent.parent
 FIN = ROOT / "财务数据"
 MKT = ROOT / "市场数据" / "结构化"
@@ -52,7 +54,7 @@ def main() -> int:
     for row in dividends:
         report = row.get("报告时间", "")
         year_match = re.match(r"(\d{4})", report)
-        if not year_match:
+        if not year_match or not in_scope(year_match.group(1)):
             continue
         # 「2025年报」「2025半年报」「2025三季报」都归入 2025 财年
         by_year[(row["公司"], year_match.group(1))].append(row)

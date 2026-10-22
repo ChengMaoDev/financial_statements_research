@@ -81,7 +81,7 @@ ROOT = Path(__file__).resolve().parent.parent
 FIN = ROOT / "财务数据"
 OUT = FIN / "合同资产与合同负债附注.csv"
 
-YEARS = [str(y) for y in range(2020, 2026)]
+YEARS = [str(y) for y in range(2023, 2026)]
 
 # 「预收货物及劳务款」(2020) 与「预收货款及劳务款」(2021 起) 是同一项目
 ALIASES = {"预收货物及劳务款": "预收货款及劳务款"}

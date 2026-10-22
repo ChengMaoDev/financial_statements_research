@@ -1913,16 +1913,16 @@ def check_subsidiaries() -> tuple[int, int]:
 
 
 def check_efficiency_coverage() -> tuple[int, int]:
-    """营运效率：覆盖 2017—2025，且现金转换周期 = 应收 + 存货 − 应付。"""
+    """营运效率：覆盖2023—2025，且现金转换周期 = 应收 + 存货 − 应付。"""
     rows = load(FIN / "营运效率与现金流.csv")
     if not rows:
         return 0, 0
 
-    print("【40】营运效率：覆盖 2017—2025，现金转换周期 = 应收 + 存货 − 应付")
+    print("【40】营运效率：覆盖2023—2025，现金转换周期 = 应收 + 存货 − 应付")
     passed = failed = 0
     for company in ("美的集团", "海尔智家", "格力电器"):
         years = sorted(r["年度"] for r in rows if r["公司"] == company)
-        ok_coverage = years == [str(y) for y in range(2017, 2026)]
+        ok_coverage = years == [str(y) for y in range(2023, 2026)]
         passed += ok_coverage
         failed += not ok_coverage
         print(
@@ -1950,7 +1950,7 @@ def check_efficiency_coverage() -> tuple[int, int]:
 
 def check_quarterly_long() -> tuple[int, int]:
     """单季表：有年报分季表的年份用披露值；相减口径只在无披露时使用。"""
-    rows = load(FIN / "单季度经营_2017起.csv")
+    rows = load(FIN / "单季度经营_2023起.csv")
     disclosed = load(FIN / "分季度经营.csv")
     if not rows:
         return 0, 0
@@ -2183,7 +2183,7 @@ def check_provisions() -> tuple[int, int]:
     due_years = sorted(
         r["年度"] for r in rows if r["公司"] == "海尔智家" and r["项目"].startswith("一年内到期")
     )
-    check(f"海尔一年内到期流动部分覆盖 {len(due_years)} 年", len(due_years) >= 7)
+    check(f"海尔一年内到期流动部分覆盖 {len(due_years)} 年", due_years == ["2023", "2024", "2025"])
 
     # 3) 与 akshare「预计非流动负债」年报数对平（B 级必须与 A 级交叉）
     ak = {
@@ -2205,7 +2205,8 @@ def check_provisions() -> tuple[int, int]:
     gree = [r for r in rows if r["公司"] == "格力电器"]
     check(
         f"格力 {len(gree)} 年全部记为未披露（空≠0）",
-        all(r["数据性质"] == "未披露" and r["金额(亿元)"] == "" for r in gree) and len(gree) >= 7,
+        all(r["数据性质"] == "未披露" and r["金额(亿元)"] == "" for r in gree)
+        and {r["年度"] for r in gree} == {"2023", "2024", "2025"},
     )
 
     # 5) 三包安装费占合计比应在合理区间（政策一致性检查）
@@ -2437,13 +2438,13 @@ def check_contract_notes() -> tuple[int, int]:
             f"{year} {kind} 隐含损失率 = 披露 {bucket['rate']}%",
             abs(implied - float(bucket["rate"])) <= 0.01,
         )
-    check(f"损失率复算覆盖 {computed} 组", computed >= 10)
+    check(f"损失率复算覆盖 {computed} 组", computed == 9)
 
     # 5) 结转率单调可解释：2020—2024 为 90%，2025 跳到 95%
     rates = {r["年度"]: float(r["金额或比例"].rstrip("%")) for r in midea if "结转率" in r["项目"]}
     check(
         f"结转率覆盖 {len(rates)} 年且只取 90/95",
-        len(rates) >= 6 and set(rates.values()) <= {90.0, 95.0},
+        set(rates) == {"2023", "2024", "2025"} and set(rates.values()) <= {90.0, 95.0},
     )
     check(
         "2025 结转率升至 95%（与 2020—2024 的 90% 不同）",
@@ -2700,7 +2701,7 @@ def check_panel_columns() -> tuple[int, int]:
         FIN / "无形资产明细.csv",
         FIN / "子公司与合并范围.csv",
         FIN / "营运效率与现金流.csv",
-        FIN / "单季度经营_2017起.csv",
+        FIN / "单季度经营_2023起.csv",
         FIN / "外币敞口与汇率敏感性.csv",
         FIN / "或有事项与期后承诺.csv",
         FIN / "预计负债与售后义务.csv",
@@ -2870,7 +2871,7 @@ def check_real_estate() -> tuple[int, int]:
 
     # 2. 月末月份连续（允许个别缺失，但不得整年中断）
     years = {m[:4] for m, _ in values}
-    ok = len(years) >= 20
+    ok = years == {"2023", "2024", "2025"}
     passed += ok
     failed += not ok
     print(f"    覆盖 {len(years)} 个年份，最新 {values[-1][0]}  {'OK' if ok else '差异'}")

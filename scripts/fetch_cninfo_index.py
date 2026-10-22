@@ -24,6 +24,8 @@ import urllib.request
 from datetime import datetime
 from pathlib import Path
 
+from research_scope import in_scope
+
 ROOT = Path(__file__).resolve().parent.parent
 OUT_DIR = ROOT / "定期报告"
 OUT_CSV = OUT_DIR / "定期报告清单.csv"
@@ -101,7 +103,7 @@ def fetch_category(
             "column": column,
             "tabName": "fulltext",
             "stock": f"{code},{org}",
-            "seDate": "2018-01-01~2026-12-31",
+            "seDate": "2023-01-01~2026-12-31",
             "category": category,
             "searchkey": "",
             "sortName": "",
@@ -120,6 +122,8 @@ def fetch_category(
         for item in items:
             title = (item.get("announcementTitle") or "").strip()
             if EXCLUDE.search(title):
+                continue
+            if not in_scope(period_of(title, kind)):
                 continue
             stamp = item.get("announcementTime")
             date = datetime.fromtimestamp(stamp / 1000).strftime("%Y-%m-%d") if stamp else ""

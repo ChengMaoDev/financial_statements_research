@@ -40,15 +40,13 @@ import argparse
 import csv
 import re
 import sys
-import urllib.request
 from pathlib import Path
 
-from pdf_util import pdf_text
+from pdf_util import pdf_text, report_pdf
 
 ROOT = Path(__file__).resolve().parent.parent
 PDF_DIR = ROOT / "年度报告"
 FIN = ROOT / "财务数据"
-HIST_PDF_DIR = Path("/tmp/fsr/pdf_hist")
 OUT = FIN / "供应商客户集中度时序.csv"
 
 COMPANIES = ("美的集团", "海尔智家", "格力电器")
@@ -56,23 +54,7 @@ SHORT = {"美的集团": "美的", "海尔智家": "海尔", "格力电器": "�
 UNIT = {"美的集团": 1_000, "海尔智家": 10_000, "格力电器": 1}
 # 关联交易附注单位与集中度表不同：美的千元，海尔/格力元
 REL_UNIT = {"美的集团": 1_000, "海尔智家": 1, "格力电器": 1}
-YEARS = range(2019, 2026)
-
-# 2019—2022 年报不在仓库内，按 定期报告/定期报告清单.csv 的 cninfo 链接补下
-HIST_URLS = {
-    ("美的", 2019): "http://static.cninfo.com.cn/finalpage/2020-04-30/1207684829.PDF",
-    ("美的", 2020): "http://static.cninfo.com.cn/finalpage/2021-04-30/1209870336.PDF",
-    ("美的", 2021): "http://static.cninfo.com.cn/finalpage/2022-04-30/1213264815.PDF",
-    ("美的", 2022): "http://static.cninfo.com.cn/finalpage/2023-04-29/1216695045.PDF",
-    ("海尔", 2019): "http://static.cninfo.com.cn/finalpage/2020-04-30/1207693342.PDF",
-    ("海尔", 2020): "http://static.cninfo.com.cn/finalpage/2021-03-31/1209489942.PDF",
-    ("海尔", 2021): "http://static.cninfo.com.cn/finalpage/2022-03-31/1212752481.PDF",
-    ("海尔", 2022): "http://static.cninfo.com.cn/finalpage/2023-03-31/1216279243.PDF",
-    ("格力", 2019): "http://static.cninfo.com.cn/finalpage/2020-04-30/1207685438.PDF",
-    ("格力", 2020): "http://static.cninfo.com.cn/finalpage/2021-04-29/1209855305.PDF",
-    ("格力", 2021): "http://static.cninfo.com.cn/finalpage/2022-04-30/1213262535.PDF",
-    ("格力", 2022): "http://static.cninfo.com.cn/finalpage/2023-04-29/1216702261.PDF",
-}
+YEARS = range(2023, 2026)
 
 
 def num(text: str | None) -> float | None:
@@ -85,21 +67,8 @@ def num(text: str | None) -> float | None:
 
 
 def text_of(short: str, year: int) -> str | None:
-    """仓库内 PDF 优先，其次历史 PDF；缺失时按已登记链接补下。"""
-    pdf = PDF_DIR / f"{short}{year}.pdf"
-    if not pdf.exists():
-        pdf = HIST_PDF_DIR / f"{short}{year}.pdf"
-    if not pdf.exists():
-        url = HIST_URLS.get((short, year))
-        if not url:
-            return None
-        HIST_PDF_DIR.mkdir(parents=True, exist_ok=True)
-        try:
-            urllib.request.urlretrieve(url, pdf)
-        except OSError as exc:
-            print(f"  {short}{year} 下载失败: {exc}", file=sys.stderr)
-            return None
-    return pdf_text(pdf)
+    """研究期原件全部在仓库内，不再下载早期年报。"""
+    return pdf_text(report_pdf(ROOT, f"{short}{year}"))
 
 
 def flatten(text: str) -> str:

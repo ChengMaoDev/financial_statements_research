@@ -15,6 +15,8 @@ import math
 from pathlib import Path
 from typing import TypedDict
 
+from research_scope import DATE_FIELDS, in_scope
+
 ROOT = Path(__file__).resolve().parent.parent
 MANIFEST = ROOT / "数据清单.json"
 FOLDERS = ("财务数据", "市场数据", "定期报告")
@@ -34,11 +36,14 @@ def snapshot(path: Path) -> Snapshot:
         header = next(reader, empty_header)
         if not header or any(not name for name in header) or len(set(header)) != len(header):
             raise ValueError(f"{path.name} 表头为空或含重复字段")
+        date_column = next((header.index(field) for field in DATE_FIELDS if field in header), None)
         seen: set[tuple[str, ...]] = set()
         count = duplicates = 0
         for line, row in enumerate(reader, 2):
             if len(row) != len(header):
                 raise ValueError(f"{path.name}:{line} 列数 {len(row)} ≠ {len(header)}")
+            if date_column is not None and not in_scope(row[date_column]):
+                raise ValueError(f"{path.name}:{line} 超出2023—2026范围：{row[date_column]}")
             for field in row:
                 try:
                     value = float(field)

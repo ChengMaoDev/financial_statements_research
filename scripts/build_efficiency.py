@@ -18,14 +18,14 @@ import csv
 import sys
 from pathlib import Path
 
+from research_scope import opening_2023
+
 ROOT = Path(__file__).resolve().parent.parent
 FIN = ROOT / "财务数据"
 OUT = FIN / "营运效率与现金流.csv"
 
 COMPANIES = ["美的集团", "海尔智家", "格力电器"]
-# 2017 起：与其他时间序列表（收现质量、利润质量、现金流结构、有息负债）对齐。
-# akshare 的资产负债表覆盖到 2017 年，再早的科目口径不一致，不做。
-YEARS = ["2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025"]
+YEARS = ["2023", "2024", "2025"]
 
 
 def load(name: str) -> list[dict[str, str]]:
@@ -71,6 +71,7 @@ def main() -> int:
 
     rows: list[list[str]] = []
     for company in COMPANIES:
+        opening = opening_2023(company, ("应收账款", "存货", "应付账款"))
         for year in YEARS:
             period = f"{year}1231"
             revenue = pick(income, company, period, ["营业收入"])
@@ -94,9 +95,19 @@ def main() -> int:
 
             # 期初余额用于计算平均占用
             prior = f"{int(year) - 1}1231"
-            receivable_prev = pick(balance, company, prior, ["应收账款"]) or receivable
-            inventory_prev = pick(balance, company, prior, ["存货"]) or inventory
-            payable_prev = pick(balance, company, prior, ["应付账款"]) or payable
+            receivable_prev = (
+                opening["应收账款"]
+                if year == "2023"
+                else pick(balance, company, prior, ["应收账款"])
+            )
+            inventory_prev = (
+                opening["存货"] if year == "2023" else pick(balance, company, prior, ["存货"])
+            )
+            payable_prev = (
+                opening["应付账款"]
+                if year == "2023"
+                else pick(balance, company, prior, ["应付账款"])
+            )
 
             if not revenue or not cost:
                 continue

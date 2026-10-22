@@ -31,7 +31,7 @@ PDF_DIR = ROOT / "年度报告"
 OUT = FIN / "渠道返利与占款.csv"
 
 COMPANIES = ["美的集团", "海尔智家", "格力电器"]
-YEARS = [str(y) for y in range(2019, 2027)]
+YEARS = [str(y) for y in range(2023, 2027)]
 
 # 返利披露位置与单位
 REBATE = {

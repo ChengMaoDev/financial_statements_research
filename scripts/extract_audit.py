@@ -61,7 +61,7 @@ ROOT = Path(__file__).resolve().parent.parent
 FIN = ROOT / "财务数据"
 
 COMPANIES = (("美的集团", "美的"), ("海尔智家", "海尔"), ("格力电器", "格力"))
-YEARS = [str(y) for y in range(2019, 2026)]
+YEARS = [str(y) for y in range(2023, 2026)]
 
 # 签字人标签：三家写法不同，且可能被拆行
 SIGNER_LABELS = (

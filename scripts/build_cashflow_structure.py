@@ -27,7 +27,7 @@ FIN = ROOT / "财务数据"
 OUT = FIN / "现金流结构.csv"
 
 COMPANIES = ["美的集团", "海尔智家", "格力电器"]
-YEARS = [str(y) for y in range(2019, 2027)]
+YEARS = [str(y) for y in range(2023, 2027)]
 
 
 def load() -> dict[tuple[str, str], dict[str, float]]:
