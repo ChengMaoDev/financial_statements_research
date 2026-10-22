@@ -1,0 +1,33 @@
+{
+  "url": "https://static.cninfo.com.cn/finalpage/2021-04-29/1209855305.PDF",
+  "at": "2026-10-22T17:52:26+08:00",
+  "sha256": "0d3c39090adf97fede39149a731a5636bd0eca2002606fb942ca70121dba9072",
+  "item": {
+    "id": null,
+    "secCode": "000651",
+    "secName": "格力电器",
+    "orgId": "gssz0000651",
+    "announcementId": "1209855305",
+    "announcementTitle": "2020年年度报告",
+    "announcementTime": 1619625600000,
+    "adjunctUrl": "finalpage/2021-04-29/1209855305.PDF",
+    "adjunctSize": 3365,
+    "adjunctType": "PDF",
+    "storageTime": null,
+    "columnId": "09020202||250101||250102||251302",
+    "pageColumn": "SZZB",
+    "announcementType": "01010503||010112||01030101",
+    "associateAnnouncement": null,
+    "important": null,
+    "batchNum": null,
+    "announcementContent": "",
+    "orgName": null,
+    "tileSecName": "格力电器",
+    "shortTitle": "2020年年度报告",
+    "announcementTypeName": null,
+    "secNameList": null,
+    "name": "格力",
+    "year": 2020,
+    "index": "原始材料/审计机构沿革_2006-2025/检索/格力_年报_1.json"
+  }
+}

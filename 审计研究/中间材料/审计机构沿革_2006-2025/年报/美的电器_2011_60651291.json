@@ -1,0 +1,33 @@
+{
+  "url": "https://static.cninfo.com.cn/finalpage/2012-03-10/60651291.PDF",
+  "at": "2026-10-22T17:52:57+08:00",
+  "sha256": "61b2c5616f79d8fdb53b8f3336bf150afb81238a264265dcf72703e2363b2df6",
+  "item": {
+    "id": null,
+    "secCode": "000527",
+    "secName": "美的电器",
+    "orgId": "gssz0000527",
+    "announcementId": "60651291",
+    "announcementTitle": "2011年年度报告",
+    "announcementTime": 1331332200000,
+    "adjunctUrl": "finalpage/2012-03-10/60651291.PDF",
+    "adjunctSize": 968,
+    "adjunctType": "PDF",
+    "storageTime": null,
+    "columnId": "250101||250102||251302||251303",
+    "pageColumn": "SZZB",
+    "announcementType": "01010501||010112||01030101",
+    "associateAnnouncement": null,
+    "important": null,
+    "batchNum": null,
+    "announcementContent": "",
+    "orgName": null,
+    "tileSecName": "美的电器",
+    "shortTitle": "2011年年度报告",
+    "announcementTypeName": null,
+    "secNameList": null,
+    "name": "美的电器",
+    "year": 2011,
+    "index": "原始材料/审计机构沿革_2006-2025/检索/美的电器_年报_1.json"
+  }
+}

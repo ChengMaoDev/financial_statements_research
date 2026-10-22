@@ -1,0 +1,4 @@
+{
+  "url": "https://www.csrc.gov.cn/csrc/c101928/c7665087/content.shtml",
+  "error": "HTTPSConnectionPool(host='www.csrc.gov.cn', port=443): Max retries exceeded with url: /csrc/c101928/c7665087/content.shtml (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1000)')))"
+}

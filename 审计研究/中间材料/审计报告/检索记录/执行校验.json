@@ -1,0 +1,37 @@
+{
+  "checked_at": "2026-10-22T15:15:37+08:00",
+  "audit_catalog_errors": [],
+  "negative_tests": {
+    "错配期间": [
+      "Period/market mismatch: MIDEA_A_2023",
+      "Report mapping mismatch: MIDEA_A_2023"
+    ],
+    "虚构路径": [
+      "Missing PDF: MIDEA_A_2023_embedded"
+    ],
+    "重复版本": [
+      "Duplicate file ID",
+      "Unexpected report version count"
+    ],
+    "虚构意见": [
+      "Report period/opinion not present on cited pages: MIDEA_A_2023_embedded"
+    ]
+  },
+  "full_validation_exit": 0,
+  "full_validation_summary": "合计：通过 621，需关注 13",
+  "full_validation_note": "verify_all原脚本无论关注项数目均返回0，不能只以退出码声称全仓无差异。",
+  "ruff": "ruff 0.17.1 check及format --check：collect_audit_reports.py、verify_all.py均通过；工具安装在批准临时目录，未修改项目依赖。",
+  "original_pdfs": "23份财报均与既有来源清单SHA-256匹配；原件未修改",
+  "full_validation_attention_groups": {
+    "季度勾稽": 3,
+    "分产品合计": 1,
+    "产销推算": 3,
+    "分部合计": 2,
+    "存货重分类": 1,
+    "供应商集中度分母": 1,
+    "固定资产口径": 1,
+    "京东排序": 1
+  },
+  "deterministic_rebuild": "离线重建两张CSV及Markdown，前后SHA-256完全一致；19份既有摘页重用。",
+  "syntax": "两个Python脚本AST解析通过"
+}

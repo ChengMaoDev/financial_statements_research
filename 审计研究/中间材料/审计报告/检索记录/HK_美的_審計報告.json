@@ -1,0 +1,30 @@
+{
+  "url": "https://www1.hkexnews.hk/search/titleSearchServlet.do?sortDir=0&sortByOptions=DateTime&category=0&market=SEHK&stockId=1000231771&documentType=-1&fromDate=20240101&toDate=20261022&title=%E5%AF%A9%E8%A8%88%E5%A0%B1%E5%91%8A&searchType=0&t1code=-2&t2Gcode=-2&t2code=-2&rowRange=100&lang=zh",
+  "parameters": {
+    "sortDir": "0",
+    "sortByOptions": "DateTime",
+    "category": "0",
+    "market": "SEHK",
+    "stockId": "1000231771",
+    "documentType": "-1",
+    "fromDate": "20240101",
+    "toDate": "20261022",
+    "title": "審計報告",
+    "searchType": "0",
+    "t1code": "-2",
+    "t2Gcode": "-2",
+    "t2code": "-2",
+    "rowRange": "100",
+    "lang": "zh"
+  },
+  "at": "2026-10-22T15:04:09+08:00",
+  "response": {
+    "result": "[{\"FILE_INFO\":\"3MB\",\"NEWS_ID\":\"12079287\",\"SHORT_TEXT\":\"公告及通告 - [海外監管公告-企業管治相關事宜]\\u003cbr/\\u003e\",\"TOTAL_COUNT\":\"4\",\"DOD_WEB_PATH\":\"\",\"STOCK_NAME\":\"美的集團\",\"TITLE\":\"海外監管公告 - 美的集團股份有限公司2025年度內部控制評價報告、截至2025年12月31日止的內部控制審計報告、2025年度控股股東及其他關聯方非經營性資金佔用及其他關聯資金往來情況匯總表及2025年度控股股東及其他關聯方佔用資金情況專項報告\",\"FILE_TYPE\":\"PDF\",\"DATE_TIME\":\"30/03/2026 21:53\",\"LONG_TEXT\":\"公告及通告 - [海外監管公告-企業管治相關事宜]\",\"STOCK_CODE\":\"00300\",\"FILE_LINK\":\"/listedco/listconews/sehk/2026/0330/2026033002730_c.pdf\"},{\"FILE_INFO\":\"13MB\",\"NEWS_ID\":\"12079069\",\"SHORT_TEXT\":\"公告及通告 - [海外監管公告-營運業績最新情況 \\u0026#x2f; 海外監管公告-企業管治相關事宜]\\u003cbr/\\u003e\",\"TOTAL_COUNT\":\"4\",\"DOD_WEB_PATH\":\"\",\"STOCK_NAME\":\"美的集團\",\"TITLE\":\"海外監管公告 - 美的集團股份有限公司2025年度報告、2025年度報告摘要及2025年度財務報表及審計報告\",\"FILE_TYPE\":\"PDF\",\"DATE_TIME\":\"30/03/2026 21:37\",\"LONG_TEXT\":\"公告及通告 - [海外監管公告-營運業績最新情況 \\u0026#x2f; 海外監管公告-企業管治相關事宜]\",\"STOCK_CODE\":\"00300\",\"FILE_LINK\":\"/listedco/listconews/sehk/2026/0330/2026033002440_c.pdf\"},{\"FILE_INFO\":\"6MB\",\"NEWS_ID\":\"11596508\",\"SHORT_TEXT\":\"公告及通告 - [海外監管公告-營運業績最新情況 \\u0026#x2f; 海外監管公告-企業管治相關事宜]\\u003cbr/\\u003e\",\"TOTAL_COUNT\":\"4\",\"DOD_WEB_PATH\":\"\",\"STOCK_NAME\":\"美的集團\",\"TITLE\":\"海外監管公告 - 美的集團股份有限公司2024年度報告、2024年年度報告摘要及2024年度財務報表及審計報告\",\"FILE_TYPE\":\"PDF\",\"DATE_TIME\":\"30/03/2025 18:55\",\"LONG_TEXT\":\"公告及通告 - [海外監管公告-營運業績最新情況 \\u0026#x2f; 海外監管公告-企業管治相關事宜]\",\"STOCK_CODE\":\"00300\",\"FILE_LINK\":\"/listedco/listconews/sehk/2025/0330/2025033000471_c.pdf\"},{\"FILE_INFO\":\"2MB\",\"NEWS_ID\":\"11596472\",\"SHORT_TEXT\":\"公告及通告 - [海外監管公告-企業管治相關事宜]\\u003cbr/\\u003e\",\"TOTAL_COUNT\":\"4\",\"DOD_WEB_PATH\":\"\",\"STOCK_NAME\":\"美的集團\",\"TITLE\":\"海外監管公告 - 美的集團股份有限公司2024年度內部控制評價報告、截至2024年12月31日的內部控制審計報告及2024年度控股股東及其他關聯方佔用資金情況專項報告\",\"FILE_TYPE\":\"PDF\",\"DATE_TIME\":\"30/03/2025 18:51\",\"LONG_TEXT\":\"公告及通告 - [海外監管公告-企業管治相關事宜]\",\"STOCK_CODE\":\"00300\",\"FILE_LINK\":\"/listedco/listconews/sehk/2025/0330/2025033000435_c.pdf\"}]",
+    "hasNextRow": false,
+    "sortList": "[[0,0]]",
+    "rowRange": 100,
+    "lang": "C",
+    "loadedRecord": 4,
+    "recordCnt": 4
+  }
+}

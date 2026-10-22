@@ -1,0 +1,30 @@
+{
+  "url": "https://www1.hkexnews.hk/search/titleSearchServlet.do?sortDir=0&sortByOptions=DateTime&category=0&market=SEHK&stockId=1000066160&documentType=-1&fromDate=20240101&toDate=20261022&title=%E5%AF%A9%E8%A8%88%E5%A0%B1%E5%91%8A&searchType=0&t1code=-2&t2Gcode=-2&t2code=-2&rowRange=100&lang=zh",
+  "parameters": {
+    "sortDir": "0",
+    "sortByOptions": "DateTime",
+    "category": "0",
+    "market": "SEHK",
+    "stockId": "1000066160",
+    "documentType": "-1",
+    "fromDate": "20240101",
+    "toDate": "20261022",
+    "title": "審計報告",
+    "searchType": "0",
+    "t1code": "-2",
+    "t2Gcode": "-2",
+    "t2code": "-2",
+    "rowRange": "100",
+    "lang": "zh"
+  },
+  "at": "2026-10-22T15:04:24+08:00",
+  "response": {
+    "result": "[{\"FILE_INFO\":\"543KB\",\"NEWS_ID\":\"12071384\",\"SHORT_TEXT\":\"公告及通告 - [海外監管公告-企業管治相關事宜]\\u003cbr/\\u003e\",\"TOTAL_COUNT\":\"6\",\"DOD_WEB_PATH\":\"\",\"STOCK_NAME\":\"海爾智家\",\"TITLE\":\"海外監管公告 - 海爾智家股份有限公司內部控制審計報告；海爾智家股份有限公司2025年度內部控制評價報告\",\"FILE_TYPE\":\"PDF\",\"DATE_TIME\":\"27/03/2026 07:10\",\"LONG_TEXT\":\"公告及通告 - [海外監管公告-企業管治相關事宜]\",\"STOCK_CODE\":\"06690\",\"FILE_LINK\":\"/listedco/listconews/sehk/2026/0327/2026032700163_c.pdf\"},{\"FILE_INFO\":\"4MB\",\"NEWS_ID\":\"12071378\",\"SHORT_TEXT\":\"公告及通告 - [海外監管公告-營運業績最新情況]\\u003cbr/\\u003e\",\"TOTAL_COUNT\":\"6\",\"DOD_WEB_PATH\":\"\",\"STOCK_NAME\":\"海爾智家\",\"TITLE\":\"海外監管公告 - 海爾智家股份有限公司2025年年度報告；海爾智家股份有限公司2025年年度報告摘要；海爾智家股份有限公司2025年度財務審計報告\",\"FILE_TYPE\":\"PDF\",\"DATE_TIME\":\"27/03/2026 07:06\",\"LONG_TEXT\":\"公告及通告 - [海外監管公告-營運業績最新情況]\",\"STOCK_CODE\":\"06690\",\"FILE_LINK\":\"/listedco/listconews/sehk/2026/0327/2026032700157_c.pdf\"},{\"FILE_INFO\":\"6MB\",\"NEWS_ID\":\"11591058\",\"SHORT_TEXT\":\"公告及通告 - [海外監管公告-營運業績最新情況]\\u003cbr/\\u003e\",\"TOTAL_COUNT\":\"6\",\"DOD_WEB_PATH\":\"\",\"STOCK_NAME\":\"海爾智家\",\"TITLE\":\"海外監管公告 - 海爾智家股份有限公司2024年年度報告；海爾智家股份有限公司審計報告\",\"FILE_TYPE\":\"PDF\",\"DATE_TIME\":\"28/03/2025 06:56\",\"LONG_TEXT\":\"公告及通告 - [海外監管公告-營運業績最新情況]\",\"STOCK_CODE\":\"06690\",\"FILE_LINK\":\"/listedco/listconews/sehk/2025/0328/2025032800234_c.pdf\"},{\"FILE_INFO\":\"776KB\",\"NEWS_ID\":\"11590985\",\"SHORT_TEXT\":\"公告及通告 - [海外監管公告-企業管治相關事宜]\\u003cbr/\\u003e\",\"TOTAL_COUNT\":\"6\",\"DOD_WEB_PATH\":\"\",\"STOCK_NAME\":\"海爾智家\",\"TITLE\":\"海外監管公告 - 海爾智家股份有限公司內部控制審計報告；海爾智家股份有限公司2024年度內部控制評價報告\",\"FILE_TYPE\":\"PDF\",\"DATE_TIME\":\"28/03/2025 06:35\",\"LONG_TEXT\":\"公告及通告 - [海外監管公告-企業管治相關事宜]\",\"STOCK_CODE\":\"06690\",\"FILE_LINK\":\"/listedco/listconews/sehk/2025/0328/2025032800153_c.pdf\"},{\"FILE_INFO\":\"6MB\",\"NEWS_ID\":\"11120506\",\"SHORT_TEXT\":\"公告及通告 - [海外監管公告-營運業績最新情況]\\u003cbr/\\u003e\",\"TOTAL_COUNT\":\"6\",\"DOD_WEB_PATH\":\"\",\"STOCK_NAME\":\"海爾智家\",\"TITLE\":\"海外監管公告 - 海爾智家股份有限公司2023年年度報告；海爾智家股份有限公司2023年度財務審計報告\",\"FILE_TYPE\":\"PDF\",\"DATE_TIME\":\"28/03/2024 07:39\",\"LONG_TEXT\":\"公告及通告 - [海外監管公告-營運業績最新情況]\",\"STOCK_CODE\":\"06690\",\"FILE_LINK\":\"/listedco/listconews/sehk/2024/0328/2024032800289_c.pdf\"},{\"FILE_INFO\":\"1MB\",\"NEWS_ID\":\"11120442\",\"SHORT_TEXT\":\"公告及通告 - [海外監管公告-企業管治相關事宜]\\u003cbr/\\u003e\",\"TOTAL_COUNT\":\"6\",\"DOD_WEB_PATH\":\"\",\"STOCK_NAME\":\"海爾智家\",\"TITLE\":\"海外監管公告 - 海爾智家股份有限公司內部控制審計報告；海爾智家股份有限公司2023年度內部控制評價報告\",\"FILE_TYPE\":\"PDF\",\"DATE_TIME\":\"28/03/2024 07:13\",\"LONG_TEXT\":\"公告及通告 - [海外監管公告-企業管治相關事宜]\",\"STOCK_CODE\":\"06690\",\"FILE_LINK\":\"/listedco/listconews/sehk/2024/0328/2024032800249_c.pdf\"}]",
+    "hasNextRow": false,
+    "sortList": "[[0,0]]",
+    "rowRange": 100,
+    "lang": "C",
+    "loadedRecord": 6,
+    "recordCnt": 6
+  }
+}

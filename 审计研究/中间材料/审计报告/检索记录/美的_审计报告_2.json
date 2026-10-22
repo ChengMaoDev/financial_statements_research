@@ -1,0 +1,51 @@
+{
+  "url": "https://www.cninfo.com.cn/new/hisAnnouncement/query",
+  "method": "POST",
+  "parameters": {
+    "pageNum": 2,
+    "pageSize": 30,
+    "tabName": "fulltext",
+    "column": "szse",
+    "stock": "000333,9900005965",
+    "searchkey": "审计报告",
+    "secDate": "2024-01-01~2026-10-22",
+    "isHLtitle": "false"
+  },
+  "retrieved_at": "2026-10-22T14:59:31+08:00",
+  "response": {
+    "classifiedAnnouncements": null,
+    "totalSecurities": 0,
+    "totalAnnouncement": 31,
+    "totalRecordNum": 31,
+    "announcements": [
+      {
+        "id": null,
+        "secCode": "000333",
+        "secName": "美的集团",
+        "orgId": "9900005965",
+        "announcementId": "63751518",
+        "announcementTitle": "2013年年度审计报告",
+        "announcementTime": 1396022400000,
+        "adjunctUrl": "finalpage/2014-03-29/63751518.PDF",
+        "adjunctSize": 8021,
+        "adjunctType": "PDF",
+        "storageTime": null,
+        "columnId": "250101||251302",
+        "pageColumn": "SZZB",
+        "announcementType": "01010903||010112||012913",
+        "associateAnnouncement": null,
+        "important": null,
+        "batchNum": null,
+        "announcementContent": "",
+        "orgName": null,
+        "tileSecName": "美的集团",
+        "shortTitle": "2013年年度审计报告",
+        "announcementTypeName": null,
+        "secNameList": null
+      }
+    ],
+    "categoryList": null,
+    "hasMore": false,
+    "totalpages": 1
+  }
+}

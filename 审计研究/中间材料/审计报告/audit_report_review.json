@@ -1,0 +1,31 @@
+{
+  "reviewed_at": "2026-10-22",
+  "method": "逐页检查目标PDF的意见首段、关键审计事项及签署页；页码为PDF文件页序，原件保留不变。结构化字段由脚本从经复核页段抽取，断言失败即停止。",
+  "reports": {
+    "GREE_A_2023": {"range": [109, 113], "printed": "109—113", "date": "2024-04-29", "firm": "中审众环会计师事务所（特殊普通合伙）", "signers": "吴梓豪（项目合伙人）；邱以武", "number": "众环审字(2024)0500139号", "kam": [["存货跌价准备的计提",110],["收入确认",110]]},
+    "GREE_A_2024": {"range": [106, 110], "printed": "106—110", "date": "2025-04-25", "firm": "中审众环会计师事务所（特殊普通合伙）", "signers": "邱以武（项目合伙人）；王慧军", "number": "众环审字(2025)0500119号", "kam": [["存货跌价准备的计提",107],["收入确认",107]]},
+    "GREE_A_2025": {"range": [81, 85], "printed": "80—84", "date": "2026-04-28", "firm": "中审众环会计师事务所（特殊普通合伙）", "signers": "邱以武（项目合伙人）；邬夏霏", "number": "众环审字〔2026〕0500452号", "kam": [["存货跌价准备的计提",82],["收入确认",82]]},
+    "MIDEA_A_2023": {"range": [153,158], "printed": "152—157", "date": "2024-03-26", "firm": "普华永道中天会计师事务所（特殊普通合伙）", "signers": "姚文平（项目合伙人）；吴芳芳", "number": "普华永道中天审字(2024)第10017号", "kam": [["暖通空调及消费电器收入确认",154],["商誉减值测试",155]]},
+    "MIDEA_A_2024": {"range": [150,155], "printed": "149—154", "date": "2025-03-28", "firm": "普华永道中天会计师事务所（特殊普通合伙）", "signers": "姚文平（项目合伙人）；吴芳芳", "number": "普华永道中天审字(2025)第10014号", "kam": [["智能家居业务收入确认",151],["KUKA集团及TLSC集团的商誉减值测试",152]]},
+    "MIDEA_A_2025": {"range": [126,131], "printed": "125—130", "date": "2026-03-30", "firm": "普华永道中天会计师事务所（特殊普通合伙）", "signers": "周伟然（项目合伙人）；吴芳芳", "number": "普华永道中天审字（2026）第10014号", "kam": [["智能家居业务收入确认",127],["KUKA集团及TLSC集团的商誉减值测试",128]]},
+    "HAIER_A_2023": {"range": [105,108], "printed": "105—108", "date": "2024-03-27", "firm": "和信会计师事务所（特殊普通合伙）", "signers": "赵波（项目合伙人）；李祥智", "number": "和信审字(2024)第000186号", "kam": [["商誉及使用寿命不确定无形资产的减值准备",105],["存货跌价准备",106],["产品质量保证",106]], "note": "签署页与财务报表共用PDF第108页；摘页保留整页。"},
+    "HAIER_A_2024": {"range": [114,117], "printed": "114—117", "date": "2025-03-27", "firm": "和信会计师事务所（特殊普通合伙）", "signers": "左伟（项目合伙人）；李祥智", "number": "和信审字(2025)第000286号", "kam": [["商誉及使用寿命不确定无形资产的减值准备",114],["存货跌价准备",115]], "note": "签署页与财务报表共用PDF第117页；摘页保留整页。"},
+    "HAIER_A_2025": {"range": [115,117], "printed": "115—117", "date": "2026-03-26", "firm": "和信会计师事务所（特殊普通合伙）", "signers": "张军（项目合伙人）；李祥智", "number": "和信审字(2026)第000296号", "kam": [["商誉及使用寿命不确定无形资产的减值准备",115],["存货跌价准备",116]]},
+    "HAIER_D_2023": {"range": [147,153], "printed": "146—152", "date": "2024-03-27", "firm": "Hexin Certified Public Accountants LLP", "signers": "Zhao bo (Engagement Partner); Li Xiang Zhi", "number": "He Xin Shen Zi. (2024) No.000186", "engagement": "HAIER_A_2023", "kam": [["Provision for impairment of goodwill and intangible assets with indefinite useful lives",148],["Provision for impairment of inventories",149],["Product warranty",150]], "note": "报告编号、日期、主体与签署信息对应A股和信报告的英文版本；不同页式不另算审计业务。"},
+    "HAIER_D_2024": {"range": [152,156], "printed": "151—155", "date": "2025-03-27", "firm": "Hexin Certified Public Accountants LLP", "signers": "Zuo Wei (Engagement Partner); Li Xiang Zhi", "number": "He Xin Shen Zi. (2025) No.000286", "engagement": "HAIER_A_2024", "kam": [["Provision for impairment of goodwill and intangible assets with indefinite useful lives",153],["Provision for impairment of inventories",154]], "note": "与A股报告对应的英文版本。"},
+    "HAIER_D_2025": {"range": [156,160], "printed": "155—159", "date": "2026-03-26", "firm": "Hexin Certified Public Accountants LLP", "signers": "Zhang Jun (Engagement Partner); Li Xiang Zhi", "number": "He Xin Shen Zi. (2026) No.000296", "engagement": "HAIER_A_2025", "kam": [["Provision for impairment of goodwill and intangible assets with indefinite useful lives",157],["Provision for impairment of inventories",158]], "note": "与A股报告对应的英文版本。"},
+    "MIDEA_H_2024": {"range": [167,173], "printed": "166—172", "date": "2025-03-28", "firm": "羅兵咸永道會計師事務所", "signers": "姚文平（審計項目合夥人）", "number": "未披露", "kam": [["收入確認－智能家居業務",168],["商譽減值評估—庫卡集團及TLSC集團",170]]},
+    "MIDEA_H_2025": {"range": [174,180], "printed": "173—179", "date": "2026-03-30", "firm": "羅兵咸永道會計師事務所", "signers": "周偉然（審計項目合夥人）", "number": "未披露", "kam": [["收入確認－智能家居業務",175],["商譽減值評估－庫卡集團及TLSC集團",177]]},
+    "HAIER_H_2023": {"range": [135,141], "printed": "134—140", "date": "2024-03-27", "firm": "國衛會計師事務所有限公司", "signers": "田新傑（審核項目董事）", "number": "未披露", "kam": [["商譽減值及其他無形資產撥備",136],["陳舊及積壓存貨撥備",137],["產品保養撥備",138]]},
+    "HAIER_H_2024": {"range": [154,159], "printed": "153—158", "date": "2025-03-27", "firm": "國衛會計師事務所有限公司", "signers": "邱偉業（審核項目董事）", "number": "未披露", "kam": [["商譽減值及其他無形資產撥備",155],["陳舊及積壓存貨撥備",156]], "note": "存货关键审计事项末段的繁体中文原文出现‘有待獲得可得憑據支持’；保留原文并列入人工核对，不据此改判审计意见。"},
+    "HAIER_H_2025": {"range": [158,163], "printed": "157—162", "date": "2026-03-26", "firm": "國衛會計師事務所有限公司", "signers": "邱偉業（審核項目合夥人）", "number": "未披露", "kam": [["商譽減值及其他無形資產撥備",159],["陳舊及積壓存貨撥備",160]], "note": "存货关键审计事项末段繁体中文有‘有待獲得可得憑據支持’表述，需人工与英文版本核对；正式意见段为无保留意见。"},
+    "MIDEA_H_2026H1": {"range": [124,124], "printed": "123", "date": "2026-08-28", "firm": "羅兵咸永道會計師事務所", "signers": "未披露个人签字人", "number": "未披露", "kam": [], "type": "中期审阅"},
+    "HAIER_H_2026H1": {"range": [5,5], "printed": "4", "date": "2026-08-27", "firm": "國衛會計師事務所有限公司", "signers": "邱偉業（執業會計師）", "number": "未披露", "kam": [], "type": "中期审阅"}
+  },
+  "unaudited": {
+    "GREE_A_2026H1": {"evidence_pages": [38,52], "quote": "公司半年度财务报告未经审计。"},
+    "MIDEA_A_2026H1": {"evidence_pages": [68,95], "quote": "公司半年度财务报告未经审计。"},
+    "HAIER_A_2026H1": {"evidence_pages": [2], "quote": "本半年度报告未经审计。"},
+    "HAIER_D_2026H1": {"evidence_pages": [2], "quote": "The interim report is unaudited."}
+  }
+}

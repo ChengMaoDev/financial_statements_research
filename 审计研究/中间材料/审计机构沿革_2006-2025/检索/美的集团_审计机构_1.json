@@ -1,0 +1,51 @@
+{
+  "url": "https://www.cninfo.com.cn/new/hisAnnouncement/query",
+  "query": {
+    "pageNum": 1,
+    "pageSize": 30,
+    "tabName": "fulltext",
+    "column": "szse",
+    "stock": "000333,9900005965",
+    "searchkey": "审计机构",
+    "seDate": "2006-01-01~2026-10-22",
+    "isHLtitle": "false",
+    "category": ""
+  },
+  "at": "2026-10-22T17:55:25+08:00",
+  "response": {
+    "classifiedAnnouncements": null,
+    "totalSecurities": 0,
+    "totalAnnouncement": 1,
+    "totalRecordNum": 1,
+    "announcements": [
+      {
+        "id": null,
+        "secCode": "000333",
+        "secName": "美的集团",
+        "orgId": "9900005965",
+        "announcementId": "1217886944",
+        "announcementTitle": "关于聘请 H 股发行并上市审计机构的公告",
+        "announcementTime": 1695052800000,
+        "adjunctUrl": "finalpage/2023-09-19/1217886944.PDF",
+        "adjunctSize": 248,
+        "adjunctType": "PDF",
+        "storageTime": null,
+        "columnId": "09020202||250101||251302",
+        "pageColumn": "SZZB",
+        "announcementType": "01010503||010112||012301",
+        "associateAnnouncement": null,
+        "important": null,
+        "batchNum": null,
+        "announcementContent": "",
+        "orgName": null,
+        "tileSecName": "美的集团",
+        "shortTitle": "关于聘请 H 股发行并上市审计机构的公告",
+        "announcementTypeName": null,
+        "secNameList": null
+      }
+    ],
+    "categoryList": null,
+    "hasMore": false,
+    "totalpages": 0
+  }
+}

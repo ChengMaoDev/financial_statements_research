@@ -1,0 +1,33 @@
+{
+  "url": "https://static.cninfo.com.cn/finalpage/2010-04-27/57875313.PDF",
+  "at": "2026-10-22T17:52:35+08:00",
+  "sha256": "dc68396f8d59785f872d25e08ac5643497b24284c3d631b1e3e983af9db44e72",
+  "item": {
+    "id": null,
+    "secCode": "000651",
+    "secName": "格力电器",
+    "orgId": "gssz0000651",
+    "announcementId": "57875313",
+    "announcementTitle": "2009年年度报告",
+    "announcementTime": 1272321060000,
+    "adjunctUrl": "finalpage/2010-04-27/57875313.PDF",
+    "adjunctSize": 1619,
+    "adjunctType": "PDF",
+    "storageTime": null,
+    "columnId": "01030101||01030402||010612||010613||250101||250102||251302||251303",
+    "pageColumn": "SZZB",
+    "announcementType": "01010501||010112||01030101",
+    "associateAnnouncement": null,
+    "important": null,
+    "batchNum": null,
+    "announcementContent": "",
+    "orgName": null,
+    "tileSecName": "格力电器",
+    "shortTitle": "2009年年度报告",
+    "announcementTypeName": null,
+    "secNameList": null,
+    "name": "格力",
+    "year": 2009,
+    "index": "原始材料/审计机构沿革_2006-2025/检索/格力_年报_2.json"
+  }
+}

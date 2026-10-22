@@ -1,0 +1,33 @@
+{
+  "url": "https://static.cninfo.com.cn/finalpage/2014-03-29/63751528.PDF",
+  "at": "2026-10-22T17:53:22+08:00",
+  "sha256": "c0a35e4572ab144ac9a8aad86f2e4f39e0ac3e0547af2f827d9a19b50cea3d93",
+  "item": {
+    "id": null,
+    "secCode": "000333",
+    "secName": "美的集团",
+    "orgId": "9900005965",
+    "announcementId": "63751528",
+    "announcementTitle": "2013年年度报告",
+    "announcementTime": 1396022400000,
+    "adjunctUrl": "finalpage/2014-03-29/63751528.PDF",
+    "adjunctSize": 2822,
+    "adjunctType": "PDF",
+    "storageTime": null,
+    "columnId": "250101||250102||251302",
+    "pageColumn": "SZZB",
+    "announcementType": "01010501||010112||01030101",
+    "associateAnnouncement": null,
+    "important": null,
+    "batchNum": null,
+    "announcementContent": "",
+    "orgName": null,
+    "tileSecName": "美的集团",
+    "shortTitle": "2013年年度报告",
+    "announcementTypeName": null,
+    "secNameList": null,
+    "name": "美的集团",
+    "year": 2013,
+    "index": "原始材料/审计机构沿革_2006-2025/检索/美的集团_年报_2.json"
+  }
+}

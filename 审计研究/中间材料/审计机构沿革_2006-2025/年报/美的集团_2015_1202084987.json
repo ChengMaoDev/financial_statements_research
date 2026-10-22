@@ -1,0 +1,33 @@
+{
+  "url": "https://static.cninfo.com.cn/finalpage/2016-03-26/1202084987.PDF",
+  "at": "2026-10-22T17:53:18+08:00",
+  "sha256": "595c0bc14c311d723b3da2b4291cfd0c1bb784fe77bed62427d269ec2f94969f",
+  "item": {
+    "id": null,
+    "secCode": "000333",
+    "secName": "美的集团",
+    "orgId": "9900005965",
+    "announcementId": "1202084987",
+    "announcementTitle": "2015年年度报告",
+    "announcementTime": 1458921600000,
+    "adjunctUrl": "finalpage/2016-03-26/1202084987.PDF",
+    "adjunctSize": 1632,
+    "adjunctType": "PDF",
+    "storageTime": null,
+    "columnId": "09020202||250101||250102||251302",
+    "pageColumn": "SZZB",
+    "announcementType": "01010503||010112||01030101",
+    "associateAnnouncement": "1202085163",
+    "important": null,
+    "batchNum": null,
+    "announcementContent": "",
+    "orgName": null,
+    "tileSecName": "美的集团",
+    "shortTitle": "2015年年度报告",
+    "announcementTypeName": null,
+    "secNameList": null,
+    "name": "美的集团",
+    "year": 2015,
+    "index": "原始材料/审计机构沿革_2006-2025/检索/美的集团_年报_1.json"
+  }
+}

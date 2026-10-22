@@ -1,0 +1,33 @@
+{
+  "url": "https://static.cninfo.com.cn/finalpage/2012-04-25/60900564.PDF",
+  "at": "2026-10-22T17:52:32+08:00",
+  "sha256": "1fea86c35bd2ba6ef70696a3903e7c13b9db4bf12e3ff69be1d0372a1b09e824",
+  "item": {
+    "id": null,
+    "secCode": "000651",
+    "secName": "格力电器",
+    "orgId": "gssz0000651",
+    "announcementId": "60900564",
+    "announcementTitle": "2011年年度报告",
+    "announcementTime": 1335306600000,
+    "adjunctUrl": "finalpage/2012-04-25/60900564.PDF",
+    "adjunctSize": 812,
+    "adjunctType": "PDF",
+    "storageTime": null,
+    "columnId": "250101||250102||251302||251303",
+    "pageColumn": "SZZB",
+    "announcementType": "01010501||010112||01030101",
+    "associateAnnouncement": null,
+    "important": null,
+    "batchNum": null,
+    "announcementContent": "",
+    "orgName": null,
+    "tileSecName": "格力电器",
+    "shortTitle": "2011年年度报告",
+    "announcementTypeName": null,
+    "secNameList": null,
+    "name": "格力",
+    "year": 2011,
+    "index": "原始材料/审计机构沿革_2006-2025/检索/格力_年报_2.json"
+  }
+}

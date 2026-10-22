@@ -1,0 +1,30 @@
+{
+  "url": "https://www1.hkexnews.hk/search/titleSearchServlet.do?sortDir=0&sortByOptions=DateTime&category=0&market=SEHK&stockId=1000231771&documentType=-1&fromDate=20240101&toDate=20261022&title=%E5%AF%A9%E9%96%B1%E5%A0%B1%E5%91%8A&searchType=0&t1code=-2&t2Gcode=-2&t2code=-2&rowRange=100&lang=zh",
+  "parameters": {
+    "sortDir": "0",
+    "sortByOptions": "DateTime",
+    "category": "0",
+    "market": "SEHK",
+    "stockId": "1000231771",
+    "documentType": "-1",
+    "fromDate": "20240101",
+    "toDate": "20261022",
+    "title": "審閱報告",
+    "searchType": "0",
+    "t1code": "-2",
+    "t2Gcode": "-2",
+    "t2code": "-2",
+    "rowRange": "100",
+    "lang": "zh"
+  },
+  "at": "2026-10-22T15:04:02+08:00",
+  "response": {
+    "result": "[]",
+    "hasNextRow": false,
+    "sortList": "[[0,0]]",
+    "rowRange": 100,
+    "lang": "C",
+    "loadedRecord": 0,
+    "recordCnt": 0
+  }
+}

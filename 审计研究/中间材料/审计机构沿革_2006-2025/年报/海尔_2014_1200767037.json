@@ -1,0 +1,33 @@
+{
+  "url": "https://static.cninfo.com.cn/finalpage/2015-03-31/1200767037.PDF",
+  "at": "2026-10-22T17:52:50+08:00",
+  "sha256": "56805698567a27c4e95e7612288d33a87986198d11aa43de8da65ea785727e34",
+  "item": {
+    "id": null,
+    "secCode": "600690",
+    "secName": "青岛海尔",
+    "orgId": "gssh0600690",
+    "announcementId": "1200767037",
+    "announcementTitle": "2014年年度报告",
+    "announcementTime": 1427731200000,
+    "adjunctUrl": "finalpage/2015-03-31/1200767037.PDF",
+    "adjunctSize": 3627,
+    "adjunctType": "PDF",
+    "storageTime": null,
+    "columnId": "250401||250402||251302",
+    "pageColumn": "SHZB",
+    "announcementType": "01010501||010113||01030101",
+    "associateAnnouncement": "1200771649",
+    "important": null,
+    "batchNum": null,
+    "announcementContent": "",
+    "orgName": null,
+    "tileSecName": "青岛海尔",
+    "shortTitle": "2014年年度报告",
+    "announcementTypeName": null,
+    "secNameList": null,
+    "name": "海尔",
+    "year": 2014,
+    "index": "原始材料/审计机构沿革_2006-2025/检索/海尔_年报_2.json"
+  }
+}

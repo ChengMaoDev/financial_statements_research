@@ -1,0 +1,32 @@
+{
+  "retrieval_date": "2026-10-17",
+  "documents": 23,
+  "unique_pdfs": 23,
+  "existing_originals_exactly_matched": 12,
+  "new_h_reports": 7,
+  "new_d_reports": 4,
+  "new_mirrors_verified": 11,
+  "original_files_unchanged": 24,
+  "applicable_combinations_missing": 0,
+  "python": "3.12.14",
+  "plan_sha256": "08c670d132c68936ab9d872f2079d0841c46c1b56fcc469856ef32fa9363b24a",
+  "pdftotext": "pdftotext version 24.03.0",
+  "pdfinfo": "pdfinfo version 26.07.0",
+  "pdftoppm": "pdftoppm version 26.07.0",
+  "existing_mirror_check": {
+    "exit_code": 1,
+    "mismatched_documents": 6,
+    "first_mismatch_pages": {
+      "海尔2023": 18,
+      "海尔2024": 4,
+      "海尔2025": 4,
+      "美的2024": 77,
+      "美的2025": 17,
+      "美的2026半年度": 18
+    },
+    "status": "legacy extraction differences retained for review",
+    "mismatched_page_classifications": {
+      "reading_order_only": 72
+    }
+  }
+}

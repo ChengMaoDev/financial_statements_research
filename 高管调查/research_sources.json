@@ -1,0 +1,286 @@
+{
+  "retrieval_date": "2026-10-17",
+  "annual_documents": {
+    "M23": "MIDEA_A_2023",
+    "M24": "MIDEA_A_2024",
+    "M25": "MIDEA_A_2025",
+    "M26": "MIDEA_A_2026H1",
+    "MH24": "MIDEA_H_2024",
+    "H23": "HAIER_A_2023",
+    "H24": "HAIER_A_2024",
+    "H25": "HAIER_A_2025",
+    "H26": "HAIER_A_2026H1",
+    "G23": "GREE_A_2023",
+    "G24": "GREE_A_2024",
+    "G25": "GREE_A_2025",
+    "G26": "GREE_A_2026H1"
+  },
+  "additional_sources": [
+    {
+      "id": "M-P",
+      "company": "美的",
+      "title": "美的集团2024年H股招股章程",
+      "publisher": "美的集团／香港交易所",
+      "date": "2024-09-09",
+      "url": "https://www1.hkexnews.hk/listedco/listconews/sehk/2024/0909/2024090900006_c.pdf",
+      "path": "origin/人物调查/美的_2024H股招股书.pdf",
+      "status": "官方PDF已归档并阅读相应章节"
+    },
+    {
+      "id": "M-W1",
+      "company": "美的",
+      "title": "美的的荣与光",
+      "publisher": "美的集团官网",
+      "date": "2020-07-09",
+      "url": "https://www.midea.com.cn/zh/about-midea/news/news-2020-07-09",
+      "status": "官网历史叙述；非独立业绩认证"
+    },
+    {
+      "id": "M-W2",
+      "company": "美的",
+      "title": "方洪波：历史学系校友捐资，华东师大设上善基金",
+      "publisher": "华东师范大学历史学系",
+      "date": "2021",
+      "url": "https://history.ecnu.edu.cn/cc/5b/c33465a379995/page.htm",
+      "status": "学校公开材料，确认校友关联"
+    },
+    {
+      "id": "M-W3",
+      "company": "美的",
+      "title": "学员动态：方洪波，中国最成功的职业经理人的100条思考",
+      "publisher": "新加坡国立大学中文EMBA项目页面",
+      "date": "2023-05-31",
+      "url": "https://www.nusembanews.com/?p=18370",
+      "status": "项目人物文章，叙述及评价分开使用"
+    },
+    {
+      "id": "M-W4",
+      "company": "美的",
+      "title": "方洪波：我思故我在",
+      "publisher": "《赢》周刊／新浪转载",
+      "date": "2002-11-19",
+      "url": "https://finance.sina.com.cn/o/20021119/2110280314.shtml",
+      "status": "历史人物采访；早期雇主档案未另获"
+    },
+    {
+      "id": "M-W5",
+      "company": "美的",
+      "title": "关于盈峰／公司历史",
+      "publisher": "盈峰集团官网",
+      "date": "页面含截至2025年末资料",
+      "url": "https://www.infore.com/About",
+      "status": "企业官网自述，未用作美的合并范围依据"
+    },
+    {
+      "id": "M-W7",
+      "company": "美的",
+      "title": "华录百纳有关股份转让及一致行动关系公告",
+      "publisher": "发行人／巨潮资讯",
+      "date": "2018-03-21",
+      "url": "https://static.cninfo.com.cn/finalpage/2018-03-21/1204502192.PDF",
+      "status": "官方公告检索内容确认父子关系；未用于推定美的其他一致行动安排"
+    },
+    {
+      "id": "M-W8",
+      "company": "美的",
+      "title": "关于对方洪波采取出具警示函措施的决定〔2019〕12号",
+      "publisher": "中国证监会广东监管局",
+      "date": "2019",
+      "url": "https://www.csrc.gov.cn/guangdong/c104548/c1383259/content.shtml",
+      "status": "官方题名已定位；正文访问超时，事件细节以招股书复核"
+    },
+    {
+      "id": "M-W9",
+      "company": "美的",
+      "title": "美的何享健：从乡镇企业改组试验田走出的改革先锋",
+      "publisher": "第一财经",
+      "date": "2018-12-18",
+      "url": "https://www.yicai.com/news/100082367.html",
+      "status": "可靠媒体背景描述；小学学历非独立学籍认证"
+    },
+    {
+      "id": "M-K1",
+      "company": "美的",
+      "title": "Changes on KUKA Supervisory Board",
+      "publisher": "KUKA",
+      "date": "2017-02-14",
+      "url": "https://www.kuka.com/-/media/kuka-corporate/documents/press/news/2017/02/20170214_changes_supervisory_board.pdf",
+      "status": "原任职机构官方历史公告"
+    },
+    {
+      "id": "M-K2",
+      "company": "美的",
+      "title": "KUKA Supervisory Board",
+      "publisher": "KUKA",
+      "date": "动态页面；无统一历史生效日",
+      "url": "https://www.kuka.com/en-de/company/about-kuka/management/supervisory-board",
+      "status": "不同法人监督机构分别列示，不倒推历史"
+    },
+    {
+      "id": "H-W1",
+      "company": "海尔",
+      "title": "海尔集团CEO周云杰简介",
+      "publisher": "海尔集团官网",
+      "date": "2026-04更新",
+      "url": "https://www.haier.com/about-haier/ceo/",
+      "status": "官网公开简历，早期CMO年份与校方资料存在差异"
+    },
+    {
+      "id": "H-W2",
+      "company": "海尔",
+      "title": "Haier Originates New Mechanism for Ecosystem Enterprise Succession",
+      "publisher": "海尔集团",
+      "date": "2021-11-05",
+      "url": "https://www.haier.com/global/press-events/news/20211105_172777.shtml",
+      "status": "集团正式接班公告；区分制度主张与事实"
+    },
+    {
+      "id": "H-W3",
+      "company": "海尔",
+      "title": "海尔创始人张瑞敏简介及人物经历",
+      "publisher": "海尔集团官网",
+      "date": "动态页面；历史事件分年记录",
+      "url": "https://www.haier.com/about-haier/founder/",
+      "status": "人物及管理理念自述，未据此认定自然人控制权"
+    },
+    {
+      "id": "H-W4",
+      "company": "海尔",
+      "title": "周云杰校友当选海尔集团董事局主席，梁海山校友受聘为总裁",
+      "publisher": "西安交通大学新闻网",
+      "date": "2021-11-10",
+      "url": "https://news.xjtu.edu.cn/info/1032/173033.htm",
+      "status": "校方教育及接班资料；部分早期岗位年份与集团简介不同"
+    },
+    {
+      "id": "H-W5",
+      "company": "海尔",
+      "title": "2025中欧ESG白皮书，李华刚校友点评",
+      "publisher": "中欧国际工商学院",
+      "date": "2025",
+      "url": "https://cn.ceibs.edu/sites/portal.prod1.dpmgr.ceibs.edu/files/2025ESG_White_Paper_CN.pdf",
+      "status": "校友点评与EMBA班级信息；不把入学标签等同毕业日期"
+    },
+    {
+      "id": "H-W6",
+      "company": "海尔",
+      "title": "Kevin Nolan biography",
+      "publisher": "GE Appliances",
+      "date": "动态页面",
+      "url": "https://geappliancesco.com/kevin-nolan/",
+      "status": "任职机构资料；荣誉博士与研究型学位分开"
+    },
+    {
+      "id": "H-W7",
+      "company": "海尔",
+      "title": "Kevin F. Nolan",
+      "publisher": "University of Connecticut, College of Engineering",
+      "date": "2019",
+      "url": "https://engineering.uconn.edu/person/nolan-kevin-f/",
+      "status": "学校公开履历和学位资料"
+    },
+    {
+      "id": "H-W8",
+      "company": "海尔",
+      "title": "谭丽霞",
+      "publisher": "中央财经大学校友总会",
+      "date": "2019-04-22",
+      "url": "https://alumni.cufe.edu.cn/info/1130/4254.htm",
+      "status": "历史人物材料，不用2019现任职衔确认2026状态"
+    },
+    {
+      "id": "H-W10",
+      "company": "海尔",
+      "title": "卓越华科人目录：李华刚人物报道",
+      "publisher": "华中科技大学校友办",
+      "date": "2025-05-16目录项",
+      "url": "https://af.hust.edu.cn/index/zyhkr/3.htm",
+      "status": "目录已读；微信正文不可读，仅作线索，未用于扩充早期履历"
+    },
+    {
+      "id": "H-W11",
+      "company": "海尔",
+      "title": "Alum Directs Emerging Smart Appliances",
+      "publisher": "UConn Today",
+      "date": "2011-10-27",
+      "url": "https://today.uconn.edu/2011/10/alum-directs-emerging-smart-appliances/",
+      "status": "学校历史人物资料"
+    },
+    {
+      "id": "G20",
+      "company": "格力",
+      "title": "关于对深圳证券交易所问询函的回复说明（2020-001）",
+      "publisher": "格力电器／巨潮资讯",
+      "date": "2020-01-18",
+      "url": "https://static.cninfo.com.cn/finalpage/2020-01-18/1207264600.PDF",
+      "path": "origin/人物调查/格力_20200118问询回复.pdf",
+      "status": "官方PDF已归档；历史协议及交易方声明与当前状态分开"
+    },
+    {
+      "id": "G-Z",
+      "company": "格力",
+      "title": "华工人物周刊第二期：朱江洪，格力创始人的传奇人生",
+      "publisher": "华南理工大学校友会",
+      "date": "2014-04-29",
+      "url": "https://alumni.scut.edu.cn/_upload/article/files/f3/9e/cd1c0bc34632874dc13b2ae20853/2b5c2b90-a370-4c60-a542-55ef17975823.pdf",
+      "path": "origin/人物调查/格力_朱江洪华工人物周刊.pdf",
+      "status": "校方原始PDF已归档；历史人物资料"
+    },
+    {
+      "id": "G-W1",
+      "company": "格力",
+      "title": "中南财经政法大学校友资料：董明珠2008级EMBA",
+      "publisher": "中南财经政法大学校友会",
+      "date": "页面未核定统一更新日",
+      "url": "https://xypt.zuel.edu.cn/xyh/article/6978",
+      "status": "校方班级信息；不当作授予日期"
+    },
+    {
+      "id": "G-W2",
+      "company": "格力",
+      "title": "Dong Mingzhu, 2015 Influential Leader",
+      "publisher": "AACSB",
+      "date": "2015人物资料",
+      "url": "https://www.aacsb.edu/about-us/advocacy/member-spotlight/influential-leaders/2015/dong-mingzhu",
+      "status": "历史职业路径；中文具体职衔优先看发行人原文"
+    },
+    {
+      "id": "G-W3",
+      "company": "格力",
+      "title": "How Do You Invest in a Changing China?",
+      "publisher": "Yale Insights",
+      "date": "2014-11-05",
+      "url": "https://insights.som.yale.edu/insights/how-do-you-invest-in-changing-china",
+      "status": "张磊历史访谈，不推定特定投资平台全部决策权"
+    },
+    {
+      "id": "G-W4",
+      "company": "格力",
+      "title": "Lei Zhang, Asia Summit 2024 speaker biography",
+      "publisher": "Milken Institute",
+      "date": "2024活动资料",
+      "url": "https://milkeninstitute.org/events/asia-summit-2024/speakers/lei-zhang",
+      "status": "嘉宾自行提供简介，Milken明确说明未独立验证；与耶鲁资料分层使用"
+    },
+    {
+      "id": "G-W5",
+      "company": "格力",
+      "title": "关于持股5%以上股东权益变动比例触及1%整数倍的公告（2026-025）",
+      "publisher": "格力电器／深圳证券交易所",
+      "date": "2026-06-05",
+      "url": "https://disc.static.szse.cn/disc/disk03/finalpage/2026-06-05/050c8c21-137f-4646-880d-2bfe43fd529a.PDF",
+      "path": "origin/人物调查/格力_20260605股东减持进展.pdf",
+      "status": "官方PDF已归档；研究期内实际交易"
+    },
+    {
+      "id": "G-W6",
+      "company": "格力",
+      "title": "关于持股5%以上股东股份补充质押的公告（2026-033）",
+      "publisher": "格力电器／深圳证券交易所",
+      "date": "2026-07-16",
+      "url": "https://disc.static.szse.cn/disc/disk03/finalpage/2026-07-16/3d075d86-c210-46b2-bf64-0e751d9f72c6.PDF",
+      "path": "origin/人物调查/格力_20260716股东补充质押.pdf",
+      "status": "官方PDF已归档；期后披露，仅用于解释已发生事件"
+    }
+  ]
+}

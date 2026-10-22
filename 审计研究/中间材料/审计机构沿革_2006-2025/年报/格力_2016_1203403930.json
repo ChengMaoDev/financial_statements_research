@@ -1,0 +1,33 @@
+{
+  "url": "https://static.cninfo.com.cn/finalpage/2017-04-27/1203403930.PDF",
+  "at": "2026-10-22T17:52:29+08:00",
+  "sha256": "d8ae9e6202aa7da06794b3551d2ce12eed187e581fcd90168d0cfb25bfbf63f3",
+  "item": {
+    "id": null,
+    "secCode": "000651",
+    "secName": "格力电器",
+    "orgId": "gssz0000651",
+    "announcementId": "1203403930",
+    "announcementTitle": "2016年年度报告",
+    "announcementTime": 1493222400000,
+    "adjunctUrl": "finalpage/2017-04-27/1203403930.PDF",
+    "adjunctSize": 2707,
+    "adjunctType": "PDF",
+    "storageTime": null,
+    "columnId": "09020202||250101||250102||251302",
+    "pageColumn": "SZZB",
+    "announcementType": "01010503||010112||01030101",
+    "associateAnnouncement": "1203406169",
+    "important": null,
+    "batchNum": null,
+    "announcementContent": "",
+    "orgName": null,
+    "tileSecName": "格力电器",
+    "shortTitle": "2016年年度报告",
+    "announcementTypeName": null,
+    "secNameList": null,
+    "name": "格力",
+    "year": 2016,
+    "index": "原始材料/审计机构沿革_2006-2025/检索/格力_年报_1.json"
+  }
+}
