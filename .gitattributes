@@ -1,2 +1,5 @@
 # CSV清单按文件字节核验；跨平台检出统一LF，避免CRLF改变哈希。
 *.csv text eol=lf
+# 审计证据以采集时的原始字节核验，禁止Git转换JSON/HTML的换行。
+审计研究/中间材料/**/*.json -text whitespace=cr-at-eol
+审计研究/中间材料/**/*.html -text -diff

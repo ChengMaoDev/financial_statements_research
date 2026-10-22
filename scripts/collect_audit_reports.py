@@ -17,6 +17,7 @@ import hashlib
 import json
 import re
 import subprocess
+import tempfile
 from datetime import datetime
 from pathlib import Path
 
@@ -26,7 +27,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "审计研究" / "中间材料" / "审计报告"
 EVIDENCE = OUT / "检索记录"
 REVIEW = OUT / "audit_report_review.json"
-CACHE = Path("C:/Users/eureka/AppData/Local/Temp/opencode/audit-collection")
+CACHE = Path(tempfile.gettempdir()) / "opencode" / "audit-collection"
 COMPANIES = {"美的": "000333", "海尔": "600690", "格力": "000651"}
 
 
