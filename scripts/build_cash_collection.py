@@ -1,22 +1,8 @@
-"""计算收现质量：销售商品收到的现金 / 营业收入，以及增值税还原后的含税收现比。
+"""计算收现比、海外收入占比和税费薪酬占营收。
 
-为什么重要：
-营业收入是权责发生制，收现比是现金制，两者的差距能暴露三件事：
-1. 应收账款的膨胀（卖了货没收到钱）
-2. 票据结算的占比（收到的是银行/商业承兑汇票，不是现金）
-3. 预收（合同负债）的变动（先收钱后发货，收现比会大于 1）
-
-两个口径：
-- **不含税收现比** = 销售商品、提供劳务收到的现金 / 营业收入
-  这个比值受增值税影响，家电内销 13%、外销 0%（退税），
-  所以内销占比高的公司天然更高，不能直接横向比较。
-- **还原增值税后的收现比** = 收到的现金 /（营业收入 ×（1 + 加权税率））
-  加权税率按内销 13%、外销 0% 估算，用分地区收入结构加权。
-  这是估算值，不是披露值，仅用于消除税负差异后的横向观察。
-
-还有一种干扰：票据。收到银行承兑汇票不产生现金流，但计入「销售商品收到的现金」
-要等到贴现或到期。因此收现比长期低于 1 未必是坏事，可能是票据结算占比高。
-三家都有大量应收票据，需要结合 `应收账款质量.csv` 与票据余额一起看。
+现金流和收入来自报表，海外收入来自主营构成。收现比受增值税、票据和预收
+影响，不能视为收入真实性结论。已移除按内销13%/外销0%统一还原的估算列，
+因为海外销售不等于从中国出口，集团实际税率和结算结构无法据此确认。
 
 用法：
     uv run python3 scripts/build_cash_collection.py
@@ -33,10 +19,7 @@ DATA = ROOT / "财务数据"
 OUT = DATA / "收现质量.csv"
 
 COMPANIES = ["美的集团", "海尔智家", "格力电器"]
-YEARS = [str(y) for y in range(2019, 2026)]
-
-# 内销增值税率：家电整机 13%。外销适用免抵退，销项不计，此处按 0% 计。
-VAT_DOMESTIC = 0.13
+YEARS = [str(y) for y in range(2023, 2026)]
 
 
 def main() -> int:
@@ -75,7 +58,7 @@ def main() -> int:
             elif row["科目"] == "支付给职工以及为职工支付的现金":
                 employees_cost[(row["公司"], year)] = value
 
-    # 海外收入占比，用于加权增值税率
+    # 海外收入仅作为收入结构列，不推算税率。
     overseas: dict[tuple[str, str], float] = {}
     with (DATA / "主营构成.csv").open(encoding="utf-8-sig") as stream:
         for row in csv.DictReader(stream):
@@ -109,10 +92,8 @@ def main() -> int:
                 continue
 
             ratio = cash / rev
-            foreign = overseas.get((company, year), 0.0)
-            foreign_share = min(max(foreign / rev, 0.0), 1.0) if rev else 0.0
-            weighted_vat = VAT_DOMESTIC * (1 - foreign_share)
-            adjusted = cash / (rev * (1 + weighted_vat)) if weighted_vat else cash / rev
+            foreign = overseas.get((company, year))
+            foreign_share = foreign / rev if foreign is not None else None
 
             # 现金流出侧：税费 + 职工薪酬占营收，反映「收到的钱有多少被刚性支出吃掉」
             outflow = (
@@ -128,9 +109,7 @@ def main() -> int:
                     f"{rev:.2f}",
                     f"{cash:.2f}",
                     f"{ratio:.4f}",
-                    f"{foreign_share * 100:.2f}",
-                    f"{weighted_vat * 100:.2f}",
-                    f"{adjusted:.4f}",
+                    "" if foreign_share is None else f"{foreign_share * 100:.2f}",
                     f"{outflow:.2f}",
                     "计算值",
                 ]
@@ -143,8 +122,6 @@ def main() -> int:
         "销售商品收到现金(亿元)",
         "收现比",
         "海外收入占比%",
-        "加权增值税率%",
-        "含税还原后收现比(估)",
         "税费+薪酬占营收%",
         "数据性质",
     ]
@@ -153,16 +130,12 @@ def main() -> int:
         writer.writerow(fields)
         writer.writerows(rows)
 
-    print(f"{'公司':<8}{'年度':<6}{'收现比':>8}{'海外%':>8}{'含税还原':>10}{'税费薪酬%':>11}")
+    print(f"{'公司':<8}{'年度':<6}{'收现比':>8}{'海外%':>8}{'税费薪酬%':>11}")
     print("-" * 52)
     for row in rows:
-        print(
-            f"{row[0]:<8}{row[1]:<6}{float(row[4]):>8.3f}{float(row[5]):>8.2f}"
-            f"{float(row[7]):>10.3f}{float(row[8]):>11.2f}"
-        )
+        print(f"{row[0]:<8}{row[1]:<6}{float(row[4]):>8.3f}{row[5]:>8}{float(row[6]):>11.2f}")
 
     print(f"\n写入 {OUT.relative_to(ROOT)}: {len(rows)} 行")
-    print("含税还原为估算值：按内销 13%、外销 0% 的分地区结构加权，仅用于消除税负差异后的横向观察")
     return 0
 
 

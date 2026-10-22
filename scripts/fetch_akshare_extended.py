@@ -20,6 +20,8 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+from research_scope import in_scope, usable_report
+
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "财务数据"
 
@@ -68,6 +70,8 @@ def fetch_statements(ak) -> None:
                 continue
             for _, record in df.iterrows():
                 period = clean(record["报告日"])
+                if not usable_report(name, period):
+                    continue
                 for field, value in record.items():
                     if field == "报告日":
                         continue
@@ -92,6 +96,11 @@ def write_frame(path: Path, company: str, code: str, df, columns: list[str]) -> 
         if not exists:
             writer.writerow(["公司", "股票代码", *columns])
         for _, record in df.iterrows():
+            date_field = next(
+                (c for c in ("报告时间", "股东户数统计截止日", "日期") if c in columns), None
+            )
+            if date_field is not None and not in_scope(clean(record.get(date_field))):
+                continue
             writer.writerow([company, code] + [clean(record.get(c)) for c in columns])
     return len(df)
 
@@ -143,9 +152,7 @@ def fetch_indicators(ak) -> None:
     total = 0
     for code, (name, _) in COMPANIES.items():
         try:
-            # 研究期是 2017—2025，起点必须对齐；原先设 2020 会缺 2017—2019
-            # 的杜邦分解与周转率（akshare 实测可回溯到 2017-03-31）。
-            df = ak.stock_financial_analysis_indicator(symbol=code, start_year="2017")
+            df = ak.stock_financial_analysis_indicator(symbol=code, start_year="2023")
         except Exception as exc:
             print(f"  {name} 分析指标失败: {exc}", file=sys.stderr)
             continue

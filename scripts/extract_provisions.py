@@ -53,16 +53,16 @@ from __future__ import annotations
 import argparse
 import csv
 import re
-import subprocess
 import sys
 from pathlib import Path
+
+from pdf_util import pdf_text, report_pdf
 
 ROOT = Path(__file__).resolve().parent.parent
 FIN = ROOT / "财务数据"
 OUT = FIN / "预计负债与售后义务.csv"
-CACHE = Path("/tmp/fsr")
 
-YEARS = [str(y) for y in range(2019, 2026)]
+YEARS = [str(y) for y in range(2023, 2026)]
 
 # 海尔附注里的项目名（保留原文名，不强行归并）
 HAIER_ITEMS = ("预计三包安装费", "未决诉讼", "其他")
@@ -78,17 +78,7 @@ NUM = re.compile(r"^-?[\d,]+(?:\.\d+)?$")
 
 def text_of(company: str, year: str) -> str:
     stem = f"{company[:2]}{year}"
-    cached = CACHE / f"{stem}.txt"
-    if cached.exists():
-        return cached.read_text(encoding="utf-8")
-    result = subprocess.run(
-        ["pdftotext", "-layout", str(ROOT / "年度报告" / f"{stem}.pdf"), "-"],
-        capture_output=True,
-        text=True,
-        timeout=300,
-        check=False,
-    )
-    return result.stdout
+    return pdf_text(report_pdf(ROOT, stem))
 
 
 def number(token: str) -> float | None:

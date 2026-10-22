@@ -39,6 +39,8 @@ import csv
 import re
 from pathlib import Path
 
+from ecommerce_fields import FIELDS, enrich
+
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "市场数据" / "电商"
 
@@ -129,6 +131,9 @@ HEADER = [
     "价格_raw",
     "价格可读",
     "店铺",
+    "数值性质",
+    "采集时间",
+    *FIELDS,
 ]
 
 
@@ -149,9 +154,32 @@ def write_csv(keyword: str, rows: list[dict[str, object]], out_path: Path) -> in
                     row["price_raw"],
                     1 if row["price_ok"] else 0,
                     row["shop"],
+                    "区间下界" if "+" in str(row["sales_display"]) else "展示整数",
+                    str(row.get("collected_at", "")),
+                    *enrich("taobao", str(row["item_id"]), str(row["title"])),
                 ]
             )
     return len(rows)
+
+
+def enrich_existing() -> None:
+    """历史 CSV 是唯一采集输入，只追加可复算字段，保留所有原始行。"""
+    for path in sorted(DATA_DIR.glob("taobao-*.csv")):
+        with path.open(encoding="utf-8-sig", newline="") as stream:
+            rows = list(csv.DictReader(stream))
+        output = []
+        for row in rows:
+            extra = [
+                "区间下界" if "+" in row["销量展示"] else "展示整数",
+                row.get("采集时间") or "2026-10-21",
+                *enrich("taobao", row["商品ID"], row["标题"]),
+            ]
+            output.append([*(row[field] for field in HEADER[:9]), *extra])
+        with path.open("w", encoding="utf-8-sig", newline="") as stream:
+            writer = csv.writer(stream, lineterminator="\n")
+            writer.writerow(HEADER)
+            writer.writerows(output)
+        print(f"补充 {path.name}：{len(rows)} 行")
 
 
 def audit() -> int:
@@ -194,7 +222,10 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--audit", action="store_true", help="校验已落盘 CSV")
+    parser.add_argument("--enrich", action="store_true", help="给历史样本追加链接及标题规格")
     args = parser.parse_args()
+    if args.enrich:
+        enrich_existing()
     if args.audit:
         raise SystemExit(1 if audit() else 0)
     parser.print_help()

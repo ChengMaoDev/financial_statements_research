@@ -62,6 +62,14 @@ def pdf_text(pdf: Path | str, layout: bool = True, timeout: int = 300) -> str:
     return result.stdout
 
 
+def report_pdf(root: Path, stem: str) -> Path:
+    """只读取仓库内研究期原始PDF。"""
+    path = root / "年度报告" / f"{stem}.pdf"
+    if not path.is_file():
+        raise FileNotFoundError(f"缺少原始报告：{path}")
+    return path
+
+
 def strip_headers(text: str) -> str:
     """删除跨页页眉，避免页眉里的年份/公司名被当作表格数据。"""
     return _HEADER.sub(" ", text)

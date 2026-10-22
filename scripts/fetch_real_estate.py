@@ -40,6 +40,8 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+from research_scope import in_scope
+
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "市场数据" / "结构化" / "房地产景气指数.csv"
 
@@ -67,7 +69,7 @@ def fetch(ak) -> int:
     rows: list[list[str]] = []
     for _, record in df.iterrows():
         date = clean(record.get("日期"))
-        if not date:
+        if not in_scope(date):
             continue
         rows.append(
             [

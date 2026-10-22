@@ -1,0 +1,2 @@
+# CSV清单按文件字节核验；跨平台检出统一LF，避免CRLF改变哈希。
+*.csv text eol=lf

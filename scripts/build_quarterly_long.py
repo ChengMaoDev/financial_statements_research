@@ -1,13 +1,13 @@
-"""单季营收与归母净利润（2017Q1—2026Q2）：披露优先、相减兜底。
+"""单季营收与归母净利润（2023Q1—2026Q2）：披露优先、相减兜底。
 
 为什么重要：
 `分季度经营.csv` 只有 2023—2025（从仓库里的 3 份年报分季表抄来）。本表把区间
-扩到 2017Q1，是判断经营节奏与季节性的底座。
+补充2026已有季度，是判断经营节奏与季节性的底座。
 
 单季数有两条来源，**必须分清**：
 
 1. **年报「分季度主要财务数据」表**（披露值，最可靠，但只有 2023—2025 在仓库内）；
-2. **累计数相减**（akshare 利润表，覆盖 2017 起，但有口径陷阱，见下）。
+2. **累计数相减**（akshare利润表，仅保留研究期，口径陷阱见下）。
 
 本表对「营业收入」与「归母净利润」两列采用**披露优先**：有年报分季表就用，
 没有才用相减；`营业总收入` 与 `营业成本` 只能相减。每行都带
@@ -43,10 +43,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 FIN = ROOT / "财务数据"
-OUT = FIN / "单季度经营_2017起.csv"
+OUT = FIN / "单季度经营_2023起.csv"
 
 COMPANIES = ("美的集团", "海尔智家", "格力电器")
-YEARS = [str(y) for y in range(2017, 2026)] + ["2026"]
+YEARS = [str(y) for y in range(2023, 2027)]
 MASKS = ("0331", "0630", "0930", "1231")
 PREV = {  # 本期累计要减去的上一期累计
     "0331": None,
@@ -158,9 +158,17 @@ def main() -> int:
                             f" 相减 {v:.2f} 差 {v - d:+.2f} 亿（疑似追溯重述）"
                         )
 
+                restated = (company, year, qn) in {
+                    ("美的集团", "2023", "Q4"),
+                    ("格力电器", "2023", "Q4"),
+                    ("海尔智家", "2023", "Q4"),
+                    ("海尔智家", "2024", "Q4"),
+                }
+                if restated:
+                    notes.append("已删除混合披露版本的累计相减数；仅保留年报分季披露")
                 margin = (
-                    f"{(revenue - cost) / revenue * 100:.2f}"
-                    if revenue and cost is not None and revenue
+                    f"{(rev_derived - cost) / rev_derived * 100:.2f}"
+                    if rev_derived and cost is not None and not restated
                     else ""
                 )
                 net = (
@@ -174,12 +182,12 @@ def main() -> int:
                         year,
                         qn,
                         period,
-                        num(gross),
+                        "" if restated else num(gross),
                         num(revenue),
-                        num(cost),
+                        "" if restated else num(cost),
                         num(profit),
-                        num(rev_derived) if rev_disc is not None else "",
-                        num(profit_derived) if profit_disc is not None else "",
+                        num(rev_derived) if rev_disc is not None and not restated else "",
+                        num(profit_derived) if profit_disc is not None and not restated else "",
                         margin,
                         net,
                         ";".join(notes),
@@ -245,7 +253,7 @@ def reconcile(
             has_disclosed = any(r[0] == company and r[1] == year and "披露" in r[12] for r in rows)
             reason = (
                 "——分季表为当年披露口径、akshare 年度数为最新年报重述口径，"
-                "差异是重述增量而非经营（见数据源分级.md 陷阱 9/20/65）"
+                "差异须按披露版本区分（见数据源分级.md）"
                 if has_disclosed
                 else ""
             )

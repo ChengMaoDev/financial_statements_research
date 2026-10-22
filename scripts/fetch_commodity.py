@@ -54,7 +54,7 @@ def fetch_commodities(ak) -> None:
     rows: list[list[str]] = []
     for code, (name, unit, usage) in COMMODITIES.items():
         try:
-            df = ak.futures_main_sina(symbol=code, start_date="20210101", end_date="20261231")
+            df = ak.futures_main_sina(symbol=code, start_date="20230101", end_date="20261231")
         except Exception as exc:
             print(f"  {name}({code}) 失败: {exc}", file=sys.stderr)
             continue
@@ -104,7 +104,7 @@ def fetch_commodities(ak) -> None:
 def fetch_fx(ak) -> None:
     """人民币汇率（中国银行牌价）。"""
     try:
-        df = ak.currency_boc_sina(symbol="美元", start_date="20210101", end_date="20261231")
+        df = ak.currency_boc_sina(symbol="美元", start_date="20230101", end_date="20261231")
     except Exception as exc:
         print(f"  汇率失败: {exc}", file=sys.stderr)
         return

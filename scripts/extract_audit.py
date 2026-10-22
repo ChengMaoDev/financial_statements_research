@@ -52,16 +52,16 @@ import argparse
 import csv
 import itertools
 import re
-import subprocess
 import sys
 from pathlib import Path
 
+from pdf_util import pdf_text, report_pdf
+
 ROOT = Path(__file__).resolve().parent.parent
 FIN = ROOT / "财务数据"
-CACHE = Path("/tmp/fsr")
 
 COMPANIES = (("美的集团", "美的"), ("海尔智家", "海尔"), ("格力电器", "格力"))
-YEARS = [str(y) for y in range(2019, 2026)]
+YEARS = [str(y) for y in range(2023, 2026)]
 
 # 签字人标签：三家写法不同，且可能被拆行
 SIGNER_LABELS = (
@@ -103,17 +103,7 @@ NOISE = re.compile(r"注[：:]|^\s*$|适用|不适用")
 
 
 def text_of(short: str, year: str) -> str:
-    cached = CACHE / f"{short}{year}.txt"
-    if cached.exists():
-        return cached.read_text(encoding="utf-8")
-    result = subprocess.run(
-        ["pdftotext", "-layout", str(ROOT / "年度报告" / f"{short}{year}.pdf"), "-"],
-        capture_output=True,
-        text=True,
-        timeout=300,
-        check=False,
-    )
-    return result.stdout
+    return pdf_text(report_pdf(ROOT, f"{short}{year}"))
 
 
 def flatten(value: str) -> str:

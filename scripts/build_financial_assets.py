@@ -239,7 +239,7 @@ def main() -> int:
                         f"{value:.2f}",
                         pct(value, assets.get((company, period))),
                         source,
-                        "披露值",
+                        "计算值" if "−" in source else "披露值",
                     ]
                 )
 

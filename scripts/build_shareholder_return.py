@@ -17,6 +17,8 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
+from research_scope import in_scope
+
 ROOT = Path(__file__).resolve().parent.parent
 FIN = ROOT / "财务数据"
 MKT = ROOT / "市场数据" / "结构化"
@@ -52,19 +54,22 @@ def main() -> int:
     for row in dividends:
         report = row.get("报告时间", "")
         year_match = re.match(r"(\d{4})", report)
-        if not year_match:
+        if not year_match or not in_scope(year_match.group(1)):
             continue
         # 「2025年报」「2025半年报」「2025三季报」都归入 2025 财年
         by_year[(row["公司"], year_match.group(1))].append(row)
 
     # 年末收盘价（用不复权价，后复权价会因除权而失真，无法算股息率）
-    year_close: dict[tuple[str, str], float] = {}
+    year_close: dict[tuple[str, str], tuple[str, float]] = {}
     for row in price:
         date = row.get("日期", "")
-        if not date.endswith("12-31"):
+        # 年末可能是休市日，取完整年度内最后一个实际交易日。
+        if date[:4] >= "2026":
             continue
         try:
-            year_close[(row["公司"], date[:4])] = float(row["收盘"])
+            key = (row["公司"], date[:4])
+            if key not in year_close or date > year_close[key][0]:
+                year_close[key] = (date, float(row["收盘"]))
         except (ValueError, KeyError):
             continue
 
@@ -85,7 +90,8 @@ def main() -> int:
         if cash == 0:
             continue
         net = profit.get((company, year))
-        close = year_close.get((company, year))
+        close_point = year_close.get((company, year))
+        close = close_point[1] if close_point else None
         rows.append(
             [
                 company,
@@ -96,6 +102,7 @@ def main() -> int:
                 f"{close:.2f}" if close else "",
                 f"{cash / close * 100:.2f}" if close and close > 0 else "",
                 "年度+中期合计",
+                close_point[0] if close_point else "",
             ]
         )
 
@@ -108,6 +115,7 @@ def main() -> int:
         "年末收盘价(元)",
         "股息率%(近似)",
         "分红类型",
+        "年末价格日期",
     ]
     with OUT.open("w", encoding="utf-8-sig", newline="") as stream:
         writer = csv.writer(stream, lineterminator="\n")

@@ -24,6 +24,8 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+from research_scope import usable_report
+
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "财务数据"
 
@@ -75,6 +77,8 @@ def fetch_abstract(ak) -> list[list[str]]:
             for column, value in series.items():
                 if column in ("选项", "指标") or value is None:
                     continue
+                if not usable_report(name, str(column)):
+                    continue
                 try:
                     number = float(value)
                 except (TypeError, ValueError):
@@ -101,6 +105,8 @@ def fetch_quarterly(ak) -> list[list[str]]:
         record = series.iloc[0]
         for column, value in record.items():
             if column in ("选项", "指标"):
+                continue
+            if not usable_report(name, str(column)):
                 continue
             try:
                 number = float(value)

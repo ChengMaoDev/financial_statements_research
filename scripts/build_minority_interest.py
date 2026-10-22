@@ -33,11 +33,13 @@ import csv
 from collections import defaultdict
 from pathlib import Path
 
+from research_scope import opening_2023
+
 ROOT = Path(__file__).resolve().parent.parent
 FIN = ROOT / "财务数据"
 OUT = FIN / "少数股东损益与权益.csv"
 
-YEARS = ("2019", "2020", "2021", "2022", "2023", "2024", "2025")
+YEARS = ("2023", "2024", "2025")
 COMPANIES = ("美的集团", "海尔智家", "格力电器")
 
 
@@ -83,6 +85,7 @@ def main() -> int:
     rows: list[list[str]] = []
     previous_equity: dict[str, float] = {}
     for company in COMPANIES:
+        previous_equity[company] = opening_2023(company, ("少数股东权益",))["少数股东权益"] / 1e8
         for year in YEARS:
             net = income.get((company, year, "净利润"))
             minority_pl = income.get((company, year, "少数股东损益"))

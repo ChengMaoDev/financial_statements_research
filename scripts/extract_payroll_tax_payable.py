@@ -95,15 +95,15 @@ from __future__ import annotations
 import argparse
 import csv
 import re
-import subprocess
 import sys
 from pathlib import Path
+
+from pdf_util import pdf_text
 
 ROOT = Path(__file__).resolve().parent.parent
 PDF_DIR = ROOT / "年度报告"
 FIN = ROOT / "财务数据"
 OUT = FIN / "职工薪酬与税费明细.csv"
-CACHE = Path("/tmp/fsr")
 
 # 公司 -> 年度 -> (PDF, 换算到元的倍数, 薪酬附注号, 税费附注号, 短期薪酬表号)
 SOURCES: dict[str, dict[str, tuple[str, int, str, str, str]]] = {
@@ -155,23 +155,6 @@ CJK = re.compile(r"[\u4e00-\u9fa5]")
 HEAD = re.compile(r"^(?:\((\d+)\)|（(\d+)）|(\d+)、)\.?\s*(.+)$")
 ORDINAL = re.compile(r"^(?:[一二三四五六七八九十]+、|\d+、)")
 CHILD = re.compile(r"^(?:其中|基本养老保险|失业保险费|企业年金|医疗保险费|工伤保险费|生育保险费)")
-
-
-def pdf_text(pdf: Path) -> str:
-    """优先读 /tmp/fsr 的 pdftotext 缓存；缺失时现转（200+ 页，转一次十几秒）。"""
-    cached = CACHE / f"{pdf.stem}.txt"
-    if cached.exists():
-        return cached.read_text(encoding="utf-8", errors="ignore")
-    result = subprocess.run(
-        ["pdftotext", "-layout", str(pdf), "-"],
-        capture_output=True,
-        text=True,
-        timeout=300,
-        check=False,
-    )
-    if result.returncode != 0:
-        raise RuntimeError(f"pdftotext 失败（{pdf}）：{result.stderr.strip()[:200]}")
-    return result.stdout
 
 
 def number(token: str) -> float:

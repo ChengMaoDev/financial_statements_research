@@ -15,6 +15,8 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+from research_scope import usable_segment
+
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "财务数据" / "主营构成.csv"
 
@@ -72,6 +74,10 @@ def main() -> int:
         if df.empty:
             continue
         for _, record in df.iterrows():
+            if not usable_segment(
+                name, clean(record.get("报告日期")), clean(record.get("分类类型"))
+            ):
+                continue
             rows.append([name] + [clean(record.get(c)) for c in COLUMNS])
         periods = sorted({clean(v) for v in df["报告日期"]})
         print(f"  {name}: {len(df)} 条，报告期 {len(periods)} 个")

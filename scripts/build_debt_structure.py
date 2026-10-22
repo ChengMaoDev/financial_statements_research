@@ -25,7 +25,7 @@ FIN = ROOT / "财务数据"
 OUT = FIN / "有息负债与偿债能力.csv"
 
 COMPANIES = ["美的集团", "海尔智家", "格力电器"]
-YEARS = [str(y) for y in range(2019, 2027)]
+YEARS = [str(y) for y in range(2023, 2027)]
 
 # 有息负债科目
 DEBT_ITEMS = {
@@ -106,9 +106,9 @@ def main() -> int:
 
             cash = sum(data.get(k, 0.0) for k in CASH_ITEMS)
             net_debt = debt_total - cash
-            equity = data.get("归属于母公司所有者权益合计", 0.0) or data.get(
-                "所有者权益(或股东权益)合计", 0.0
-            )
+            equity = data.get("归属于母公司股东权益合计")
+            if equity is None:
+                raise ValueError(f"{company} {period} 缺少归母净资产，不能计算净负债率")
             total_assets = data.get("资产总计", 0.0)
 
             profit = pl.get((company, period), {})
@@ -133,6 +133,8 @@ def main() -> int:
                     f"{(net_debt / equity * 100) if equity else 0:.2f}",
                     coverage,
                     "计算值",
+                    "有息负债为科目加总上限，含一年内到期的预计负债等；净负债率分母为归母净资产",
+                    f"{item_values['应付短期债券'] / 1e8:.2f}",
                 ]
             )
 
@@ -151,6 +153,8 @@ def main() -> int:
         "净负债率%",
         "利息保障倍数",
         "数据性质",
+        "口径说明",
+        "应付短期债券(亿元)",
     ]
     with OUT.open("w", encoding="utf-8-sig", newline="") as stream:
         writer = csv.writer(stream, lineterminator="\n")
