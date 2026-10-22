@@ -113,7 +113,10 @@ def report_lines(path: Path) -> list[tuple[int, str]]:
     ]
 
 
-def extract(path: Path, statement: str) -> list[Evidence]:
+def extract(
+    path: Path, statement: str, *, metrics: dict[str, tuple[str, ...]] | None = None
+) -> list[Evidence]:
+    selected = METRICS[statement] if metrics is None else metrics
     short = path.stem[:2]
     year = path.stem[2:6]
     interim = "半年度" in path.stem
@@ -155,7 +158,7 @@ def extract(path: Path, statement: str) -> list[Evidence]:
         label = PREFIX.sub("", compact(body[: matches[0].start()]))
         label = re.sub(r"(?:四|五|七|十八)[、(（][^\s]*$", "", label)
         label = re.sub(r"[（(](?:净)?(?:亏损|损失|收益).*", "", label)
-        for metric, aliases in METRICS[statement].items():
+        for metric, aliases in selected.items():
             if metric in found or not any(
                 label == alias or label.startswith(alias + "（") or label.startswith(alias + "(")
                 for alias in aliases
@@ -196,7 +199,7 @@ def extract(path: Path, statement: str) -> list[Evidence]:
                     )
                 )
             found[metric] = values
-    missing = METRICS[statement].keys() - found.keys()
+    missing = selected.keys() - found.keys()
     if missing:
         raise ValueError(f"{path.name} 合并{statement}缺项目：{', '.join(sorted(missing))}")
     return [entry for entries in found.values() for entry in entries]
@@ -220,6 +223,8 @@ def audit(root: Path) -> tuple[list[list[str]], int]:
     rows: list[list[str]] = []
     failures = 0
     for entry in evidence:
+        if not "2023" <= entry.period[:4] <= "2026":
+            continue
         key = (entry.company, entry.period, entry.statement, entry.metric)
         book = books.get(key)
         versions = [

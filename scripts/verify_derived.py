@@ -1,6 +1,6 @@
 """研究期间报表恒等式与本轮修正公式的独立复算。
 
-2017—2025 年度及截至 2026H1 的累计报表逐期勾稽。金额容差为原值 1 元或
+2023—2025年度及截至2026H1的累计报表逐期勾稽。金额容差为原值1元或
 亿元表末位舍入；百分比容差为 0.02 个百分点。恒等式和可复现不代表原始披露真实。
 """
 
@@ -11,7 +11,7 @@ import statistics
 from collections import defaultdict
 from pathlib import Path
 
-from normalize_snapshots import usable_report, usable_segment
+from research_scope import usable_report, usable_segment
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -36,7 +36,7 @@ def verify(root: Path = ROOT) -> tuple[int, int]:
     for name in ("资产负债表", "利润表", "现金流量表"):
         grouped: dict[tuple[str, str], dict[str, float]] = defaultdict(dict)
         for row in load(root, f"财务数据/{name}.csv"):
-            if not "20170101" <= row["报告期"] <= "20260630":
+            if not "20230101" <= row["报告期"] <= "20260630":
                 continue
             try:
                 grouped[(row["公司"], row["报告期"])][row["科目"]] = float(row["数值"])
@@ -201,7 +201,7 @@ def verify(root: Path = ROOT) -> tuple[int, int]:
         0,
         0,
     )
-    quarterly = load(root, "财务数据/单季度经营_2017起.csv")
+    quarterly = load(root, "财务数据/单季度经营_2023起.csv")
     excluded = {
         ("美的集团", "2023"),
         ("格力电器", "2023"),

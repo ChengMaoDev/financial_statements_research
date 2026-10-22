@@ -25,7 +25,7 @@ FIN = ROOT / "财务数据"
 OUT = FIN / "有息负债与偿债能力.csv"
 
 COMPANIES = ["美的集团", "海尔智家", "格力电器"]
-YEARS = [str(y) for y in range(2019, 2027)]
+YEARS = [str(y) for y in range(2023, 2027)]
 
 # 有息负债科目
 DEBT_ITEMS = {

@@ -62,7 +62,7 @@ ROOT = Path(__file__).resolve().parent.parent
 FIN = ROOT / "财务数据"
 OUT = FIN / "预计负债与售后义务.csv"
 
-YEARS = [str(y) for y in range(2019, 2026)]
+YEARS = [str(y) for y in range(2023, 2026)]
 
 # 海尔附注里的项目名（保留原文名，不强行归并）
 HAIER_ITEMS = ("预计三包安装费", "未决诉讼", "其他")

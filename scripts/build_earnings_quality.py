@@ -28,7 +28,7 @@ FIN = ROOT / "财务数据"
 OUT = FIN / "利润质量.csv"
 
 COMPANIES = ["美的集团", "海尔智家", "格力电器"]
-YEARS = [str(y) for y in range(2019, 2027)]
+YEARS = [str(y) for y in range(2023, 2027)]
 
 
 def load_annual_stmt(name: str) -> dict[tuple[str, str], dict[str, float]]:

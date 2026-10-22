@@ -20,7 +20,7 @@ FIN = ROOT / "财务数据"
 OUT = FIN / "原材料价格指数.csv"
 
 COMPANIES = ["美的集团", "海尔智家", "格力电器"]
-YEARS = ["2021", "2022", "2023", "2024", "2025", "2026"]
+YEARS = ["2023", "2024", "2025", "2026"]
 
 
 def load(path: Path) -> list[dict[str, str]]:
@@ -108,7 +108,7 @@ def main() -> int:
     print("-" * 48)
     for company in COMPANIES:
         previous = None
-        for year in YEARS[:5]:
+        for year in YEARS[:-1]:
             hit = [r for r in cost if r["公司"] == company and r["年度"] == year]
             if not hit:
                 continue

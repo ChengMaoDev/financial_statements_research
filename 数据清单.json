@@ -51,8 +51,8 @@
       "利润比例",
       "毛利率"
     ],
-    "rows": 595,
-    "sha256": "01d45c019b6e93b2e60678308f12abf5fe93f2fb2f91da266f046ad35258aa8f",
+    "rows": 247,
+    "sha256": "ab127cb79efff698a0b9091b6569f7983a993e3daa09bb0a0d56f9de36392d01",
     "duplicate_rows": 0
   },
   "财务数据/主要财务指标.csv": {
@@ -64,8 +64,8 @@
       "数值",
       "采集时间"
     ],
-    "rows": 3917,
-    "sha256": "d287413a0cdbd68c7eacc559abf9d0aedc9613fa68d4e5710130f245a1ada773",
+    "rows": 588,
+    "sha256": "1fea8b966706296848db07b8c84644d8e23ca7e17af5fc54e3d2adc1b402e720",
     "duplicate_rows": 0
   },
   "财务数据/会计政策对比.csv": {
@@ -93,8 +93,8 @@
       "口径说明",
       "来源"
     ],
-    "rows": 322,
-    "sha256": "4b5979a354bdfc99a88a8ff0e11ff6b59a4e5246d06a58be0eceb4f35a36f921",
+    "rows": 138,
+    "sha256": "8cee458817f52f36b92b0075ac8020664021ce4fbef8ff3b6215c009dff97c8f",
     "duplicate_rows": 0
   },
   "财务数据/公司概况.csv": {
@@ -250,8 +250,8 @@
       "实施方案分红说明",
       "报告时间"
     ],
-    "rows": 82,
-    "sha256": "ede77376df98537be46683b4ed71e1dbc6cd7c6e9bb55ea4df4f267261def23c",
+    "rows": 13,
+    "sha256": "fd33d93d5cc50d5f9cff5309489f8529879b23e9313573159ed52663c6035cd8",
     "duplicate_rows": 0
   },
   "财务数据/分部报告.csv": {
@@ -276,8 +276,8 @@
       "科目",
       "数值"
     ],
-    "rows": 11481,
-    "sha256": "f857463cdee4675e588c8e49470c18d57e05babc11ca5eca56751f1c1fb5f5cd",
+    "rows": 2127,
+    "sha256": "5d071ae8c054be4b29ff5394de3868987026a174f05b897fb311149342111ead",
     "duplicate_rows": 0
   },
   "财务数据/利润质量.csv": {
@@ -299,11 +299,11 @@
       "商誉(亿元)",
       "数据性质"
     ],
-    "rows": 21,
-    "sha256": "7bf41ce59e34eb6573a66a1d132a0b0c9190b2d813f80ec5dce92c0795935225",
+    "rows": 9,
+    "sha256": "ab0cdf1066bba8d9bc0d0be1bcab23a39287cb3ebad15e819ccfaf6f3f90fee3",
     "duplicate_rows": 0
   },
-  "财务数据/单季度经营_2017起.csv": {
+  "财务数据/单季度经营_2023起.csv": {
     "columns": [
       "公司",
       "年度",
@@ -319,8 +319,8 @@
       "单季净利率%",
       "口径"
     ],
-    "rows": 114,
-    "sha256": "089351f4cf9590f78948be0db70dca9586b954342e18e794889eca896b23176e",
+    "rows": 42,
+    "sha256": "d67c4d14f563b9ece0c15c14795bb9669230745333ebd40bfa2c7655038a8169",
     "duplicate_rows": 0
   },
   "财务数据/原文交叉核验.csv": {
@@ -341,8 +341,8 @@
       "数据性质",
       "后续核对文件"
     ],
-    "rows": 696,
-    "sha256": "28e811633f639c123557cd81611d00fe30be1e0569a175986c5ccee25cb884b2",
+    "rows": 609,
+    "sha256": "8ebc1ea2b8426da136bc2eb8aa6c4427636f9d5da76334cfc94cf75eed8ec816",
     "duplicate_rows": 0
   },
   "财务数据/原材料价格指数.csv": {
@@ -354,8 +354,8 @@
       "年内最高",
       "交易日数"
     ],
-    "rows": 48,
-    "sha256": "0bfdfefadca5c2727adc254c02da317f6a4769a273bff32d19d5d459812a27bb",
+    "rows": 32,
+    "sha256": "52507ae84bd2be0532ec92cfaf401a919cce058aebe3d4b8d1e2323223ad2067",
     "duplicate_rows": 0
   },
   "财务数据/受限资产.csv": {
@@ -384,8 +384,8 @@
       "数据性质",
       "口径说明"
     ],
-    "rows": 122,
-    "sha256": "0062445a3d223db27aef8e9f79880d84d4bc486cef1ff7d04f1d60ae388c8c93",
+    "rows": 68,
+    "sha256": "c1656f83936600b7683f81e2063af7ce23ab254e82978bc3048c00db47a4e149",
     "duplicate_rows": 0
   },
   "财务数据/员工构成.csv": {
@@ -534,8 +534,8 @@
       "数据性质",
       "来源"
     ],
-    "rows": 63,
-    "sha256": "9086feca3372f63096fcde774e08c4e06530cfa07a32d8b191e0da852bdc64cf",
+    "rows": 29,
+    "sha256": "e795d712a83bf0504c5982bb01d32a111c8fa630b424ebb9cdede6beb730e215",
     "duplicate_rows": 0
   },
   "财务数据/客户供应商集中度.csv": {
@@ -567,8 +567,8 @@
       "口径断点说明",
       "数据性质"
     ],
-    "rows": 26,
-    "sha256": "fe5012262ec90f0e964bc16c56e6df1f9d58e31070e8c6defff6f3ee1c376c38",
+    "rows": 9,
+    "sha256": "85a3d346640c61df6e9c5ac2b9f65892009d9514a53cd3fde5c731f2225c5d8f",
     "duplicate_rows": 0
   },
   "财务数据/少数股东损益与权益.csv": {
@@ -581,8 +581,8 @@
       "口径说明",
       "数据性质"
     ],
-    "rows": 123,
-    "sha256": "9dee9a950af4a3529008f985c98b7e05699d49615fe37379ee01e16d7935fa84",
+    "rows": 54,
+    "sha256": "91cc8dbe54a44d8bf85b11c43393ec69f899c205c27461e17b5f9edd8e8da2bf",
     "duplicate_rows": 0
   },
   "财务数据/应收账款质量.csv": {
@@ -626,8 +626,8 @@
       "其他营业成本项(%)",
       "利息等营业收入(%)"
     ],
-    "rows": 15,
-    "sha256": "751e3bf6879e918cf33d262258ad6a588e18f66e1913b34c4b80827291a5462d",
+    "rows": 9,
+    "sha256": "d6c61ff5d4ddba0149ae50cfaabe44165938892be7aef5bd8bec592cabee874a",
     "duplicate_rows": 0
   },
   "财务数据/或有事项与期后承诺.csv": {
@@ -698,8 +698,8 @@
       "税费+薪酬占营收%",
       "数据性质"
     ],
-    "rows": 21,
-    "sha256": "aac1a12cc4db4b3902cc21b0407cb8809c66a20dac82fd4930aaa984cc19150b",
+    "rows": 9,
+    "sha256": "15122ae3c2cb99bad97c8efb5f33141966e14470d4a59375291fb7c2d24371f7",
     "duplicate_rows": 0
   },
   "财务数据/政府补助与其他收益.csv": {
@@ -749,8 +749,8 @@
       "口径说明",
       "应付短期债券(亿元)"
     ],
-    "rows": 21,
-    "sha256": "468d5977f88b06698d75637280c6d2c9f4940011e58b632ccba2487a2dee5304",
+    "rows": 9,
+    "sha256": "229c1ca54ea290936d63ef885e52d56c56d7fba959401b908e2270674c1e6e8a",
     "duplicate_rows": 0
   },
   "财务数据/汇兑损益.csv": {
@@ -811,8 +811,8 @@
       "净占款-含返利(亿元)",
       "数据性质"
     ],
-    "rows": 21,
-    "sha256": "83fcacbccc69819dd08bf8b90a5e11e2817a3e58dd91b85337a5dbea2b9ebfd2",
+    "rows": 9,
+    "sha256": "58cd87bdd5f753673470544b1313bdf212794a1d357e263e7d11be8683b1f293",
     "duplicate_rows": 0
   },
   "财务数据/现金流结构.csv": {
@@ -833,8 +833,8 @@
       "分红付息占经营现金流%",
       "数据性质"
     ],
-    "rows": 21,
-    "sha256": "31c9624b08ca2df00db68794cbe9e2407d1a5ebdf954d54c2da7c393cf4486dd",
+    "rows": 9,
+    "sha256": "cd40aec2b5033b3b029ef1a4dce1e4a5bdeed57eabee5c2c4a22004c5e6457f1",
     "duplicate_rows": 0
   },
   "财务数据/现金流量表.csv": {
@@ -845,8 +845,8 @@
       "科目",
       "数值"
     ],
-    "rows": 11482,
-    "sha256": "4cf86d5bfbdbed2d95fd063d04bdcd0ceadcb1460c85e4a190b33ca19f404f4b",
+    "rows": 1839,
+    "sha256": "d63322bd73eefe43ca4e5867c969aad48ce2893dde560c6c20672bae56f2dd80",
     "duplicate_rows": 0
   },
   "财务数据/研发人员结构.csv": {
@@ -937,8 +937,8 @@
       "分红类型",
       "年末价格日期"
     ],
-    "rows": 71,
-    "sha256": "a21c53237ab05fc61594d50ad349d9300e3fbea68b859bb4c9c4097ea46b7807",
+    "rows": 9,
+    "sha256": "d61c5238b3282aa969b0299e0329ffc131f68abb0e35525b9b81e6a25f55d0e5",
     "duplicate_rows": 0
   },
   "财务数据/股东户数.csv": {
@@ -959,8 +959,8 @@
       "股本变动原因",
       "股东户数公告日期"
     ],
-    "rows": 151,
-    "sha256": "7f5da12c26ffa33d7608a4009e13368e8094499567264151ecdcd8c1a8e1d06e",
+    "rows": 29,
+    "sha256": "fb2eb9971cd47cc33c1bd0df6cff1f8baf8810e172be6e72f370eb6944395b94",
     "duplicate_rows": 0
   },
   "财务数据/股份支付.csv": {
@@ -996,8 +996,8 @@
       "合同负债占收入%",
       "预付款占成本%"
     ],
-    "rows": 27,
-    "sha256": "13047d73749743088b3af19b8b225397cca2af355e409b12dc7fbe2e6b584999",
+    "rows": 9,
+    "sha256": "55e5051e02568bf4bddd6ba9110ee8bd7a46735d70f619a9d64915cfbc40a183",
     "duplicate_rows": 0
   },
   "财务数据/财务净收益.csv": {
@@ -1105,8 +1105,8 @@
       "2-3年以内其它应收款(元)",
       "3年以内其它应收款(元)"
     ],
-    "rows": 114,
-    "sha256": "29e1f72de2602ffce634cc2e89c6674203b3590f617d9de12188067e97c1def3",
+    "rows": 42,
+    "sha256": "045815aa69ae8e324dd24adc0e5212b0baf2ffb835c0b85333fe327066846680",
     "duplicate_rows": 0
   },
   "财务数据/资产负债表.csv": {
@@ -1117,8 +1117,8 @@
       "科目",
       "数值"
     ],
-    "rows": 19627,
-    "sha256": "47f03b9e5dd090cb6b1f6454d3ac43eb1a388175ebb60cea6c72c08b5d67c607",
+    "rows": 3162,
+    "sha256": "d3477cd417a5edc03501bdaf4485b82b2cec0df8b3e7ad460837e84669d3efd6",
     "duplicate_rows": 0
   },
   "财务数据/递延所得税.csv": {
@@ -1162,8 +1162,8 @@
       "口径说明",
       "数据性质"
     ],
-    "rows": 95,
-    "sha256": "d3ff194ec1e56f6feeeaed54a60734cbdfc31e5fac3cedbc09f9ced4b5a5b35f",
+    "rows": 45,
+    "sha256": "37391cb3c16bb1bb4208d298aca8b4bb534f506cbd81d61d556830aab2922447",
     "duplicate_rows": 0
   },
   "财务数据/预计负债与售后义务.csv": {
@@ -1175,8 +1175,8 @@
       "数据性质",
       "口径说明"
     ],
-    "rows": 49,
-    "sha256": "c9f670a4dabcd72e928e38f99a14491e48ff66bcd44b6da72ddd6443e8736234",
+    "rows": 21,
+    "sha256": "989f2b74674dcce659061662b235b1e93d4207fe9fc3aee5d0bb5687fa37c934",
     "duplicate_rows": 0
   },
   "市场数据/京东空调快照.csv": {
@@ -1839,8 +1839,8 @@
       "date",
       "value"
     ],
-    "rows": 5478,
-    "sha256": "f27373a6e8b174b1996b0ea506daf8f861101cdd0dd64704a0990540cc52d901",
+    "rows": 4170,
+    "sha256": "47986b5eafecce6eee8028b7b95a1e9473e65d5614acec8daf6d59a541a6aad8",
     "duplicate_rows": 0
   },
   "市场数据/结构化/北向资金持股.csv": {
@@ -1852,8 +1852,8 @@
       "持股市值",
       "持股占比"
     ],
-    "rows": 5067,
-    "sha256": "c444264f9e7eaf2499176be131f6a1efc6369e3c7fcbf04f9fb9fdd787e584c5",
+    "rows": 1056,
+    "sha256": "553f81dc62185a14b4c6905d246ccc0a7411dcd668bfdcb17b3c28335defcbcf",
     "duplicate_rows": 0
   },
   "市场数据/结构化/十大流通股东.csv": {
@@ -1905,8 +1905,8 @@
       "成交量",
       "持仓量"
     ],
-    "rows": 11224,
-    "sha256": "566f31d8cb54e0778c6f42fae8bc4ffe259fab45faa82796d2b2e87d2ed3f844",
+    "rows": 7344,
+    "sha256": "08fa3e473557659d4bbcae8b48f89f89419547c53d4c7afae28903d7fd514e3c",
     "duplicate_rows": 0
   },
   "市场数据/结构化/房地产景气指数.csv": {
@@ -1921,8 +1921,8 @@
       "数据性质",
       "采集时间"
     ],
-    "rows": 326,
-    "sha256": "3a507da7571f1b165df3de69a181c6d27a584004e5d22b190962c491854c24d2",
+    "rows": 36,
+    "sha256": "5031017ff2cfbc2168af904f4fe5a5af10f060c986d74ed52b44ab72f6cd1dd2",
     "duplicate_rows": 0
   },
   "市场数据/结构化/日线行情.csv": {
@@ -1941,8 +1941,8 @@
       "涨跌额",
       "换手率"
     ],
-    "rows": 4209,
-    "sha256": "254c74b94e7f329c4499a5c18cc81c893c7ec4fa5fe9e81237728f68b4bb1bed",
+    "rows": 2754,
+    "sha256": "c98ba7461e91ce683694de7471f71381c87e27fdfe60568d56843d4283d75d71",
     "duplicate_rows": 0
   },
   "市场数据/结构化/日线行情_不复权.csv": {
@@ -1957,8 +1957,8 @@
       "成交量",
       "成交额"
     ],
-    "rows": 4209,
-    "sha256": "c5e6f0ef1a3b3ff6b3ec80c5ac5944c48de58fe574c42415ddd5c94b75e769aa",
+    "rows": 2754,
+    "sha256": "b0f1aa27c1f3e36c53d672f2cbcd24173e64ecf48287c26ebbd7b0cde1ace621",
     "duplicate_rows": 0
   },
   "市场数据/结构化/汇率.csv": {
@@ -1970,8 +1970,8 @@
       "央行中间价",
       "中行折算价"
     ],
-    "rows": 1617,
-    "sha256": "e3cc706e9fb3026853903e6ba3ee041eb59248ff49118aadd27b7661af179ca5",
+    "rows": 1097,
+    "sha256": "d0012c34cbd347c1a4ba636947e215b8c14ff4babe39617cc622340db999b3e6",
     "duplicate_rows": 0
   },
   "市场数据/结构化/融资融券.csv": {
@@ -2027,8 +2027,8 @@
       "标题",
       "PDF链接"
     ],
-    "rows": 105,
-    "sha256": "dc1dd85fb14ddc95abf27c41ca435726c84a1af65c56f49096c36ad62ac0327e",
+    "rows": 42,
+    "sha256": "851aa6a9f4710a0b89271c43b18ed674632234a0b66d0078a9fed447f39860b5",
     "duplicate_rows": 0
   },
   "定期报告/港股公告索引.csv": {

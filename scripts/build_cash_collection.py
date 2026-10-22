@@ -19,7 +19,7 @@ DATA = ROOT / "财务数据"
 OUT = DATA / "收现质量.csv"
 
 COMPANIES = ["美的集团", "海尔智家", "格力电器"]
-YEARS = [str(y) for y in range(2019, 2026)]
+YEARS = [str(y) for y in range(2023, 2026)]
 
 
 def main() -> int:

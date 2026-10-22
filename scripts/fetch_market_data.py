@@ -17,6 +17,8 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+from research_scope import in_scope
+
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "市场数据" / "结构化"
 
@@ -49,6 +51,9 @@ def write_frame(path: Path, company: str, code: str, df, columns: list[str]) -> 
         if not exists:
             writer.writerow(["公司", "股票代码", *columns])
         for _, record in df.iterrows():
+            date_field = next((c for c in ("报告期", "date", "日期") if c in columns), None)
+            if date_field is not None and not in_scope(clean(record.get(date_field))):
+                continue
             writer.writerow([company, code] + [clean(record.get(c)) for c in columns])
     return len(df)
 
@@ -112,7 +117,7 @@ def fetch_price(ak) -> None:
                 df = ak.stock_zh_a_hist(
                     symbol=code,
                     period="daily",
-                    start_date="20210101",
+                    start_date="20230101",
                     end_date=f"{datetime.now():%Y%m%d}",
                     adjust=adjustment,
                 )

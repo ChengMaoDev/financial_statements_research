@@ -14,6 +14,8 @@ import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 
+from research_scope import filter_file
+
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "市场数据" / "结构化"
 
@@ -37,6 +39,7 @@ def write_rows(path: Path, header: list[str], rows: list[list[str]]) -> int:
         writer = csv.writer(stream, lineterminator="\n")
         writer.writerow(header)
         writer.writerows(rows)
+    filter_file(path)
     return len(rows)
 
 

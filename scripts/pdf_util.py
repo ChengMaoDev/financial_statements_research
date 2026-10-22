@@ -63,15 +63,11 @@ def pdf_text(pdf: Path | str, layout: bool = True, timeout: int = 300) -> str:
 
 
 def report_pdf(root: Path, stem: str) -> Path:
-    """只接受原始 PDF；历史报告可预置于 /tmp/fsr/pdf_hist，绝不读取旧 txt。"""
-    candidates = (root / "年度报告" / f"{stem}.pdf", Path("/tmp/fsr/pdf_hist") / f"{stem}.pdf")
-    for candidate in candidates:
-        if candidate.is_file():
-            return candidate
-    raise FileNotFoundError(
-        f"缺少原始报告 {stem}.pdf；请按定期报告/定期报告清单.csv 下载至年度报告/"
-        "或 /tmp/fsr/pdf_hist/，不能以无来源的文本缓存代替"
-    )
+    """只读取仓库内研究期原始PDF。"""
+    path = root / "年度报告" / f"{stem}.pdf"
+    if not path.is_file():
+        raise FileNotFoundError(f"缺少原始报告：{path}")
+    return path
 
 
 def strip_headers(text: str) -> str:
