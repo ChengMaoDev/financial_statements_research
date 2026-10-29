@@ -173,9 +173,12 @@ def check_segments() -> tuple[int, int]:
 
 
 def check_research() -> tuple[int, int]:
-    """年报研发投入 vs 利润表研发费用。"""
+    """研发投入勾稽，并核对会计政策结论与资本化披露。"""
+    from extract_accounting_policy import describe_research_capitalization
+
     disclosures = load(FIN / "治理与经营披露.csv")
     income = load(FIN / "利润表.csv")
+    policies = load(FIN / "会计政策对比.csv")
     if not disclosures or not income:
         return 0, 0
 
@@ -196,7 +199,7 @@ def check_research() -> tuple[int, int]:
         except ValueError:
             continue
         diff = (value - reference) / reference * 100
-        # 美的全费用化 0%，海尔含资本化 +6%，格力口径差 -0.3%
+        # 美的是研发费用口径；海尔、格力披露的研发投入含资本化。
         ok = abs(diff) < 8
         passed += ok
         failed += not ok
@@ -204,7 +207,25 @@ def check_research() -> tuple[int, int]:
             f"    {row['公司']:<8}{year:<10}{value / 1e8:>12,.2f}"
             f"{reference / 1e8:>12,.2f}{diff:>8.2f}%  {row['研发投入_口径']}"
         )
-    print(f"    通过 {passed}，差异 {failed}（差异为资本化口径，非错误）\n")
+    print(f"    通过 {passed}，差异 {failed}（差异为口径诊断，非资本化结论）")
+
+    policy_by_company = {
+        row["公司"]: row["取值"]
+        for row in policies
+        if row["政策类别"] == "研发支出资本化"
+    }
+    print("    会计政策结论 vs 2025 年研发资本化披露")
+    for row in disclosures:
+        if row["报告期"] != "2025 年度":
+            continue
+        expected = describe_research_capitalization(row, "2025")
+        actual = policy_by_company.get(row["公司"])
+        ok = actual == expected
+        passed += ok
+        failed += not ok
+        result = "OK" if ok else f"应为：{expected}"
+        print(f"    {row['公司']:<8}{actual or '缺失'}  {result}")
+    print(f"    累计通过 {passed}，差异 {failed}\n")
     return passed, failed
 
 

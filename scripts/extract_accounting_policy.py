@@ -10,10 +10,12 @@
    折旧年限越短，当期成本越高、利润越保守。
 3. 应收账款坏账计提 —— 格力 3 年以上计提 97.81%，海尔 64.56%，美的按
    组合模型（境内 3.89% / 境外 1.07%），口径完全不同。
-4. 研发支出资本化 —— 海尔部分资本化，美的、格力全部费用化。
+4. 研发支出资本化 —— 海尔、格力部分资本化；美的未列示资本化金额，
+   不能据此推定为零或全部费用化。
 
-文字类政策无法用正则可靠抽取，采用「关键词存在性校验 + 人工确认取值」：
-脚本会断言每个结论对应的关键词确实出现在当年年报中，防止张冠李戴。
+除研发资本化金额外，文字类政策采用「关键词存在性校验 + 人工确认取值」；
+研发资本化金额和比率直接解析年报。脚本会断言结论对应的关键词确实出现，
+防止张冠李戴。
 
 用法：
     uv run python3 scripts/extract_accounting_policy.py --all
@@ -28,11 +30,14 @@ import subprocess
 import sys
 from pathlib import Path
 
+from fetch_pdf_disclosures import extract_research
+
 ROOT = Path(__file__).resolve().parent.parent
 PDF_DIR = ROOT / "年度报告"
 OUT = ROOT / "财务数据" / "会计政策对比.csv"
 
 REPORTS = {"美的集团": "美的2025.pdf", "海尔智家": "海尔2025.pdf", "格力电器": "格力2025.pdf"}
+CAPITALIZATION_DISCLOSERS = {"海尔智家", "格力电器"}
 
 # (类别, 折旧年限正则模板) —— 通过类名定位，再取该行内的年数区间
 DEPRECIATION = {
@@ -57,7 +62,7 @@ DEPRECIATION = {
 }
 
 # 文字类政策：结论 + 必须在年报中出现的关键词（用于自动校验）
-# forbidden：必须【不】出现的关键词，用于验证「全部费用化」这类否定结论
+# 研发资本化结论由 extract_research 从同一份 PDF 解析，避免硬编码金额。
 POLICY = {
     "美的集团": [
         ("存货计价方法", "先进先出法", ["先进先出法"], []),
@@ -69,9 +74,9 @@ POLICY = {
         ),
         (
             "研发支出资本化",
-            "全部费用化（年报未披露本期资本化研发投入）",
+            "",
             ["研发投入"],
-            ["本期资本化研发投入"],
+            [],
         ),
         ("销售返利", "附注单列「预提销售返利」", ["预提销售返利"], []),
     ],
@@ -85,7 +90,7 @@ POLICY = {
         ),
         (
             "研发支出资本化",
-            "部分资本化（2025 年资本化率 5.79%）",
+            "",
             ["本期资本化研发投入", "研发投入资本化的比重"],
             [],
         ),
@@ -101,9 +106,9 @@ POLICY = {
         ),
         (
             "研发支出资本化",
-            "全部费用化（年报未披露本期资本化研发投入）",
-            ["研发投入"],
-            ["本期资本化研发投入"],
+            "",
+            ["研发投入资本化的金额", "资本化研发投入占研发投入的比"],
+            [],
         ),
         ("销售返利", "附注单列「销售返利」", ["销售返利"], []),
     ],
@@ -115,6 +120,8 @@ def pdf_text(pdf: Path) -> str:
         ["pdftotext", "-layout", str(pdf), "-"],
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         timeout=300,
         check=False,
     )
@@ -128,6 +135,23 @@ def flatten(text: str) -> str:
     )
     text = re.sub(r"(?m)^\s*\d{2,3}\s*$", " ", text)
     return re.sub(r"\s+", " ", text)
+
+
+def describe_research_capitalization(record: dict[str, str], year: str) -> str:
+    """把研发披露转成可比结论；缺失金额不推定为零。"""
+    amount_text = record.get("研发投入_资本化", "")
+    ratio_text = record.get("研发投入资本化比重", "")
+    if not amount_text and not ratio_text:
+        return "未列示资本化金额"
+    if not amount_text or not ratio_text:
+        raise ValueError(f"{year} 年研发资本化金额与比重未同时披露")
+
+    amount = float(amount_text)
+    if amount < 1e8:
+        amount_label = f"{amount / 1e4:,.2f} 万元（约 {amount / 1e8:,.2f} 亿元）"
+    else:
+        amount_label = f"{amount / 1e8:,.2f} 亿元"
+    return f"部分资本化（{year} 年资本化金额 {amount_label}，资本化率 {ratio_text}%）"
 
 
 def main() -> int:
@@ -146,7 +170,15 @@ def main() -> int:
         if not pdf.exists():
             print(f"  缺少 {filename}", file=sys.stderr)
             continue
-        flat = flatten(pdf_text(pdf))
+        text = pdf_text(pdf)
+        flat = flatten(text)
+        research = extract_research(text)
+        year_match = re.search(r"(20\d{2})", filename)
+        year = year_match.group(1) if year_match else ""
+        if company in CAPITALIZATION_DISCLOSERS and not all(
+            research[field] for field in ("研发投入_资本化", "研发投入资本化比重")
+        ):
+            raise ValueError(f"{company} {year} 年研发资本化金额或比重提取失败")
 
         # 折旧年限
         for category, pattern in DEPRECIATION[company]:
@@ -177,6 +209,8 @@ def main() -> int:
                     file=sys.stderr,
                 )
                 continue
+            if category == "研发支出资本化":
+                conclusion = describe_research_capitalization(research, year)
             rows.append(
                 {
                     "公司": company,
