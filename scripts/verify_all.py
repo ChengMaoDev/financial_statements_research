@@ -210,9 +210,7 @@ def check_research() -> tuple[int, int]:
     print(f"    通过 {passed}，差异 {failed}（差异为口径诊断，非资本化结论）")
 
     policy_by_company = {
-        row["公司"]: row["取值"]
-        for row in policies
-        if row["政策类别"] == "研发支出资本化"
+        row["公司"]: row["取值"] for row in policies if row["政策类别"] == "研发支出资本化"
     }
     print("    会计政策结论 vs 2025 年研发资本化披露")
     for row in disclosures:
